@@ -125,10 +125,10 @@
         var value, propertyName;
 
         for (propertyName in this.defaults) {
-            value = new this.Value(object[propertyName], propertyName);
+            value = new Element.Value(object[propertyName], propertyName);
 
-            if (value.constructor != this.Value || value.check() === false) {
-                value = new this.Value(this.defaults[propertyName]);
+            if (value.constructor != Element.Value || value.check() === false) {
+                value = new Element.Value(this.defaults[propertyName]);
             }
 
             this[propertyName] = value;
@@ -206,7 +206,7 @@
         var value, propertyName;
 
         for (propertyName in this.defaults) {
-            value = new this.Value(this.defaults[propertyName]);
+            value = new Element.Value(this.defaults[propertyName]);
 
             this[propertyName] = value;
 
@@ -248,7 +248,7 @@
 
     /* Value */
 
-    Element.prototype.Value = function (value, type) {
+    Element.Value = function (value, type) {
         var valueType =
             (typeof value === 'object') ? 'declaration' :
             (typeof value === 'string') ? 'inline'      : null;
@@ -282,7 +282,7 @@
         }
     };
 
-    Element.prototype.Value.prototype.dissassemble = function(input, type) {
+    Element.Value.prototype.dissassemble = function(input, type) {
         if (typeof type != 'string') {
             return false;
         }
@@ -308,14 +308,14 @@
         return true;
     };
 
-    Element.prototype.Value.prototype.assemble = function (roundValue) {
+    Element.Value.prototype.assemble = function (roundValue) {
         var value = (roundValue === true) ? Math.round(this.value) : this.value;
         var unit  = (this.unit  === null) ? ''                     : this.unit;
 
         return value + unit;
     };
 
-    Element.prototype.Value.prototype.apply = function (target) {
+    Element.Value.prototype.apply = function (target) {
         if (typeof target != 'object') {
             return false;
         }
@@ -335,7 +335,7 @@
         return true;
     };
 
-    Element.prototype.Value.prototype.px = function (context, recalc) {
+    Element.Value.prototype.px = function (context, recalc) {
         if (this.unit === 'px') {
             return this;
         }
@@ -350,7 +350,7 @@
             return this.cache;
         }
 
-        var Value  = context.Value, parent = context.parent, value;
+        var parent = context.parent, value;
 
         value = (parent)
                     ? (this.type === 'width' || this.type === 'height')
@@ -362,7 +362,7 @@
                             ].px(parent).value / 100 * this.value
                     : 0
 
-        this.cache = new Value({
+        this.cache = new Element.Value({
             type  : this.type,
             value : value,
             unit  : 'px'
@@ -371,7 +371,7 @@
         return this.cache;
     };
 
-    Element.prototype.Value.prototype.correct = {
+    Element.Value.prototype.correct = {
         width   : 'width',
         height  : 'height',
         x       : 'left',
@@ -379,9 +379,9 @@
         z_index : 'zIndex'
     };
 
-    Element.prototype.Value.prototype.rules = {};
+    Element.Value.prototype.rules = {};
 
-    Element.prototype.Value.prototype.check = function () {
+    Element.Value.prototype.check = function () {
         return true;
     };
 
