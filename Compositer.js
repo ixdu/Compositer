@@ -188,9 +188,9 @@
 
     /* Root */
 
-    Element.prototype.root = new Element();
+    Element.root = new Element();
 
-    Element.prototype.root.init = function () {
+    Element.root.init = function () {
         if (typeof document.body != 'object' || typeof WSSize() != 'object') {
             return false;
         }
@@ -235,9 +235,9 @@
         return this;
     };
 
-    Element.prototype.root.childs = [];
+    Element.root.childs = [];
 
-    Element.prototype.root.defaults = {
+    Element.root.defaults = {
         width   : {type : 'width',   value : WSSize().width,  unit : 'px'},
         height  : {type : 'height',  value : WSSize().height, unit : 'px'},
         x       : {type : 'x',       value : 0,               unit : 'px'},
@@ -657,7 +657,7 @@
     /* Compositer */
 
     Compositer = function () {
-        var root = (new Element).root.init();
+        var root = Element.root.init();
 
         if (typeof root === 'object') {
             root.id(Element.pool.put(root));
