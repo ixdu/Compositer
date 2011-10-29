@@ -127,7 +127,7 @@
         for (propertyName in this.defaults) {
             value = new Element.Value(object[propertyName], propertyName);
 
-            if (value.constructor != Element.Value || value.check() === false) {
+            if (value.constructor != Element.Value) {
                 value = new Element.Value(this.defaults[propertyName]);
             }
 
@@ -186,7 +186,7 @@
     Element.Image.prototype = new Element();
 
 
-    /* Root */
+    /* Root element */
 
     Element.root = new Element();
 
@@ -377,12 +377,6 @@
         x       : 'left',
         y       : 'top',
         z_index : 'zIndex'
-    };
-
-    Element.Value.prototype.rules = {};
-
-    Element.Value.prototype.check = function () {
-        return true;
     };
 
 
