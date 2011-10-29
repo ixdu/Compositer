@@ -85,7 +85,7 @@
                     }
                 ),
 
-                anim_right = comp.anim_create([
+                anim = comp.anim_create([
                     {
                         duration : 1000,
 
@@ -93,10 +93,7 @@
                             {
                                 x : 75
                             }
-                    }
-                ]),
-
-                anim_down = comp.anim_create([
+                    },
                     {
                         duration : 1000,
 
@@ -104,10 +101,7 @@
                             {
                                 y : 75
                             }
-                    }
-                ]),
-
-                anim_left = comp.anim_create([
+                    },
                     {
                         duration : 1000,
 
@@ -115,10 +109,7 @@
                             {
                                 x : -75
                             }
-                    }
-                ]),
-
-                anim_up = comp.anim_create([
+                    },
                     {
                         duration : 1000,
 
@@ -129,38 +120,13 @@
                     }
                 ]),
 
-                bind_right = comp.anim_bind(frame, anim_right),
-                bind_down  = comp.anim_bind(frame, anim_down),
-                bind_left  = comp.anim_bind(frame, anim_left),
-                bind_up    = comp.anim_bind(frame, anim_up),
+                bind = comp.anim_bind(frame, anim),
 
-                animation = {
-                    current : 0,
-
-                    list : [
-                        bind_right,
-                        bind_down,
-                        bind_left,
-                        bind_up
-                    ],
-
-                    get : (function () {
-                        if (this.current === 4) {
-                            this.current = 0;
-                        }
-
-                        return this.list[this.current++];
-                    })
-                };
-
-                comp.event_register(bind_right, 'animation_stopped');
-                comp.event_register(bind_down, 'animation_stopped');
-                comp.event_register(bind_left, 'animation_stopped');
-                comp.event_register(bind_up, 'animation_stopped');
+                comp.event_register(bind, 'animation_stopped');
 
                 comp.events_callback_set(function (elementId, eventName, eventData) {
                     if (eventName === 'animation_stopped') {
-                        comp.anim_start(animation.get());
+                        comp.anim_start(bind);
                     }
                 });
 
@@ -170,7 +136,7 @@
 
                 comp.frame_add(root, frame);
 
-                comp.anim_start(animation.get());
+                comp.anim_start(bind);
 
                 return undefined;
             }
