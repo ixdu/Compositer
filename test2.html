@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+        <title>Test 2</title>
+        <script type="text/javascript" src="Compositer.js"></script>
+        <script type="text/javascript">
+            /*
+              shared objects for client and server implementations of dsa
+              Copyright (C) 2011  Alexey Bagin aka freeze (email freeze@2du.ru)
+
+              This program is free software: you can redistribute it and/or modify
+              it under the terms of the GNU Affero General Public License as
+              published by the Free Software Foundation, either version 3 of the
+              License, or (at your option) any later version.
+
+              This program is distributed in the hope that it will be useful,
+              but WITHOUT ANY WARRANTY; without even the implied warranty of
+              MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+              GNU Affero General Public License for more details.
+
+              You should have received a copy of the GNU Affero General Public License
+              along with this program.  If not, see <http://www.gnu.org/licenses/>.'
+
+              version 1.0
+            */
+
+            function start () {
+                var comp = new Compositer();
+
+                root = 0,
+
+                frame = comp.frame_create(
+                    {
+                        width : '25%',
+                        height : '25%',
+
+                        x : '0%',
+                        y : '0%',
+
+                        z_index : '1'
+                    }
+                ),
+
+                image_red = comp.image_create(
+                    {
+                        width : '100%',
+                        height : '100%',
+
+                        x : '0%',
+                        y : '0%',
+
+                        z_index : '1',
+
+                        source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY3growIAAycBLhVrvukAAAAASUVORK5CYII='
+                    }
+                ),
+
+                image_green = comp.image_create(
+                    {
+                        width : '80%',
+                        height : '80%',
+
+                        x : '10%',
+                        y : '10%',
+
+                        z_index : '2',
+
+                        source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2D4zwAAAgIBANHTRkQAAAAASUVORK5CYII='
+                    }
+                ),
+
+                image_blue = comp.image_create(
+                    {
+                        width : '60%',
+                        height : '60%',
+
+                        x : '20%',
+                        y : '20%',
+
+                        z_index : '3',
+
+                        source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2Bg+A8AAQMBAKJTBdAAAAAASUVORK5CYII='
+                    }
+                ),
+
+                anim_right = comp.anim_create([
+                    {
+                        duration : 1000,
+
+                        actions :
+                            {
+                                x : 75
+                            }
+                    }
+                ]),
+
+                anim_down = comp.anim_create([
+                    {
+                        duration : 1000,
+
+                        actions :
+                            {
+                                y : 75
+                            }
+                    }
+                ]),
+
+                anim_left = comp.anim_create([
+                    {
+                        duration : 1000,
+
+                        actions :
+                            {
+                                x : -75
+                            }
+                    }
+                ]),
+
+                anim_up = comp.anim_create([
+                    {
+                        duration : 1000,
+
+                        actions :
+                            {
+                                y : -75
+                            }
+                    }
+                ]),
+
+                bind_right = comp.anim_bind(frame, anim_right),
+                bind_down  = comp.anim_bind(frame, anim_down),
+                bind_left  = comp.anim_bind(frame, anim_left),
+                bind_up    = comp.anim_bind(frame, anim_up),
+
+                animation = {
+                    current : 0,
+
+                    list : [
+                        bind_right,
+                        bind_down,
+                        bind_left,
+                        bind_up
+                    ],
+
+                    get : (function () {
+                        if (this.current === 4) {
+                            this.current = 0;
+                        }
+
+                        return this.list[this.current++];
+                    })
+                };
+
+                comp.event_register(bind_right, 'animation_stopped');
+                comp.event_register(bind_down, 'animation_stopped');
+                comp.event_register(bind_left, 'animation_stopped');
+                comp.event_register(bind_up, 'animation_stopped');
+
+                comp.events_callback_set(function (elementId, eventName, eventData) {
+                    if (eventName === 'animation_stopped') {
+                        comp.anim_start(animation.get());
+                    }
+                });
+
+                comp.frame_add(frame, image_red);
+                comp.frame_add(frame, image_green);
+                comp.frame_add(frame, image_blue);
+
+                comp.frame_add(root, frame);
+
+                comp.anim_start(animation.get());
+
+                return undefined;
+            }
+        </script>
+    </head>
+    <body onload="start()"></body>
+</html>
