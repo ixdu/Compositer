@@ -125,9 +125,9 @@
         var value, propertyName;
 
         for (propertyName in this.defaults) {
-            value = new Element.Value(object[propertyName], propertyName);
-
-            if (value.constructor != Element.Value) {
+            if (typeof object[propertyName] === 'string') {
+                value = new Element.Value(object[propertyName], propertyName);
+            } else {
                 value = new Element.Value(this.defaults[propertyName]);
             }
 
@@ -240,8 +240,8 @@
     Element.root.childs = [];
 
     Element.root.defaults = {
-        width   : {type : 'width',   value : WSSize().width,  unit : 'px' },
-        height  : {type : 'height',  value : WSSize().height, unit : 'px' },
+        width   : {type : 'width',   value : 100,             unit : '%'  },
+        height  : {type : 'height',  value : 100,             unit : '%'  },
         x       : {type : 'x',       value : 0,               unit : 'px' },
         y       : {type : 'y',       value : 0,               unit : 'px' },
         z_index : {type : 'z_index', value : 1                            },
@@ -373,7 +373,8 @@
                         parent[
                             (this.type === 'x') ? 'width' : 'height'
                         ].px(parent).value / 100 * this.value
-                : 0;
+                : (this.type === 'x' || this === 'y') ? 0 :
+                    (this.type === 'width') ? WSSize().width : WSSize().height;
 
         this.cache = new Element.Value({
             type  : this.type,
@@ -436,11 +437,28 @@
     Element.Value.prototype.types.opacity.prototype = new Element.Value();
 
     Element.Value.prototype.types.opacity.prototype.apply = function (target) {
+        if (arguments.callee.work === false) {
+            return undefined;
+        }
+
         var opacity = 1 - (Math.abs(this.value) / 100);
 
         opacity = (opacity < 0) ? 0 : opacity;
 
         target.html.style.opacity = opacity;
+
+        if (arguments.callee.work === undefined) {
+
+            if (+target.html.style.opacity === opacity) {
+                arguments.callee.work = true;
+            } else {
+                arguments.callee.work = false;
+
+                return undefined;
+            }
+        }
+
+        return undefined;
     };
 
 
@@ -502,9 +520,9 @@
 
     Animation.prototype.init = function(chain) {
         if (
-            chain === undefined        ||
-            chain.constructor != Array ||
-            chain.length < 1
+            chain             === undefined ||
+            chain.constructor !=  Array     ||
+            chain.length      <   1
         ) {
             return false;
         }
