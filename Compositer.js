@@ -239,8 +239,8 @@
     Element.root.childs = [];
 
     Element.root.defaults = {
-        width   : {type : 'width',   value : WSSize().width,  unit : 'px'},
-        height  : {type : 'height',  value : WSSize().height, unit : 'px'},
+        width   : {type : 'width',   value : 100,             unit : '%' },
+        height  : {type : 'height',  value : 100,             unit : '%' },
         x       : {type : 'x',       value : 0,               unit : 'px'},
         y       : {type : 'y',       value : 0,               unit : 'px'},
         z_index : {type : 'z_index', value : 1                           },
@@ -371,7 +371,8 @@
                         parent[
                             (this.type === 'x') ? 'width' : 'height'
                         ].px(parent).value / 100 * this.value
-                : 0;
+                : (this.type === 'x' || this === 'y') ? 0 :
+                    (this.type === 'width') ? WSSize().width : WSSize().height;
 
         this.cache = new Element.Value({
             type  : this.type,
@@ -435,9 +436,9 @@
 
     Element.Value.prototype.types.opacity.prototype.apply = function (target) {
         var opacity = 1 - (Math.abs(this.value) / 100);
-        
+
         opacity = (opacity < 0) ? 0 : opacity;
-        
+
         target.html.style.opacity = opacity;
     };
 
