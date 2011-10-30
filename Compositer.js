@@ -125,9 +125,9 @@
         var value, propertyName;
 
         for (propertyName in this.defaults) {
-            value = new Element.Value(object[propertyName], propertyName);
-
-            if (value.constructor != Element.Value) {
+            if (typeof object[propertyName] === 'string') {
+                value = new Element.Value(object[propertyName], propertyName);
+            } else {
                 value = new Element.Value(this.defaults[propertyName]);
             }
 
