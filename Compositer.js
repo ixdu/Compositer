@@ -186,6 +186,28 @@
 
     Element.Image.prototype = new Element();
 
+    /* Text element */
+
+    Element.Text = function (object) {
+        this.html = document.createElement('span')
+
+        if (typeof object != 'object') {
+            object = {};
+        }
+        
+        if (typeof object.text === 'string') {
+            this.html.textContent = object.text;
+        }
+        
+        this.init(object);
+    }
+    
+    Element.Text.prototype = new Element();
+    
+    Element.Text.prototype.resized = function () {
+        /* TODO */
+    }
+
 
     /* Root element */
 
@@ -860,6 +882,18 @@
                 Element.pool.free(imageId);
 
                 return undefined;
+            }),
+
+            text_create : (function (object) {
+                var text = new Element.Text(object);
+
+                text.id(Element.pool.put(text));
+
+                return text.id();
+            }),
+
+            text_destroy : (function (textId) {
+               /* TODO */
             }),
 
 
