@@ -140,11 +140,12 @@
     };
 
     Element.prototype.defaults = {
-        width   : {type : 'width',   value : 100, unit : '%'},
-        height  : {type : 'height',  value : 100, unit : '%'},
+        width   : {type : 'width',   value : 100, unit : '%' },
+        height  : {type : 'height',  value : 100, unit : '%' },
         x       : {type : 'x',       value : 0,   unit : 'px'},
         y       : {type : 'y',       value : 0,   unit : 'px'},
-        z_index : {type : 'z_index', value : 1}
+        z_index : {type : 'z_index', value : 1               },
+        opacity : {type : 'opacity', value : 0,   unit : '%' }
     };
 
 
@@ -242,7 +243,8 @@
         height  : {type : 'height',  value : WSSize().height, unit : 'px'},
         x       : {type : 'x',       value : 0,               unit : 'px'},
         y       : {type : 'y',       value : 0,               unit : 'px'},
-        z_index : {type : 'z_index', value : 1}
+        z_index : {type : 'z_index', value : 1                           },
+        opacity : {type : 'opacity', value : 0,               unit : '%' }
     };
 
 
@@ -423,13 +425,21 @@
 
     Element.Value.prototype.types.z_index.prototype.apply = function (target) {
         target.html.style.zIndex = Math.round(this.value);
-    }
+    };
 
 
     /* Opacity type */
 
     Element.Value.prototype.types.opacity = function () {};
     Element.Value.prototype.types.opacity.prototype = new Element.Value();
+
+    Element.Value.prototype.types.opacity.prototype.apply = function (target) {
+        var opacity = 1 - (Math.abs(this.value) / 100);
+        
+        opacity = (opacity < 0) ? 0 : opacity;
+        
+        target.html.style.opacity = opacity;
+    };
 
 
     /* Rotate type */
