@@ -140,12 +140,13 @@
     };
 
     Element.prototype.defaults = {
-        width   : {type : 'width',   value : 100, unit : '%' },
-        height  : {type : 'height',  value : 100, unit : '%' },
-        x       : {type : 'x',       value : 0,   unit : 'px'},
-        y       : {type : 'y',       value : 0,   unit : 'px'},
-        z_index : {type : 'z_index', value : 1               },
-        opacity : {type : 'opacity', value : 0,   unit : '%' }
+        width   : {type : 'width',   value : 100, unit : '%'  },
+        height  : {type : 'height',  value : 100, unit : '%'  },
+        x       : {type : 'x',       value : 0,   unit : 'px' },
+        y       : {type : 'y',       value : 0,   unit : 'px' },
+        z_index : {type : 'z_index', value : 1                },
+        opacity : {type : 'opacity', value : 0,   unit : '%'  },
+        rotate  : {type : 'rotate',  value : 0,   unit : 'deg'}
     };
 
 
@@ -239,12 +240,13 @@
     Element.root.childs = [];
 
     Element.root.defaults = {
-        width   : {type : 'width',   value : WSSize().width,  unit : 'px'},
-        height  : {type : 'height',  value : WSSize().height, unit : 'px'},
-        x       : {type : 'x',       value : 0,               unit : 'px'},
-        y       : {type : 'y',       value : 0,               unit : 'px'},
-        z_index : {type : 'z_index', value : 1                           },
-        opacity : {type : 'opacity', value : 0,               unit : '%' }
+        width   : {type : 'width',   value : WSSize().width,  unit : 'px' },
+        height  : {type : 'height',  value : WSSize().height, unit : 'px' },
+        x       : {type : 'x',       value : 0,               unit : 'px' },
+        y       : {type : 'y',       value : 0,               unit : 'px' },
+        z_index : {type : 'z_index', value : 1                            },
+        opacity : {type : 'opacity', value : 0,               unit : '%'  },
+        rotate  : {type : 'rotate',  value : 0,               unit : 'deg'}
     };
 
 
@@ -446,6 +448,17 @@
 
     Element.Value.prototype.types.rotate = function () {};
     Element.Value.prototype.types.rotate.prototype = new Element.Value();
+
+    Element.Value.prototype.types.rotate.prototype.apply = function (target) {
+        var rotate = Math.round(this.value);
+
+        target.html.style.setProperty('-ms-transform', '', null);
+
+        target.html.style.setProperty('-moz-transform',    'rotate(' + rotate + 'deg)', null);
+        target.html.style.setProperty('-webkit-transform', 'rotate(' + rotate + 'deg)', null);
+        target.html.style.setProperty('-o-transform',      'rotate(' + rotate + 'deg)', null);
+        target.html.style.setProperty('-ms-transform',     'rotate(' + rotate + 'deg)', null);
+    };
 
 
     /* Animation */
