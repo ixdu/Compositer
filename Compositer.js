@@ -249,81 +249,89 @@
     /* Value */
 
     Element.Value = function (value, type) {
-        var valueType =
-            (typeof value === 'object') ? 'declaration' :
-            (typeof value === 'string') ? 'inline'      : null;
+        var typeName =
+            (typeof type === 'string') ? type :
+            (typeof value === 'object' &&
+            typeof value.type === 'string') ? value.type : null;
 
-        if (valueType === 'inline' && typeof type != 'string') {
-            return {};
+        if (typeName === null) {
+            return undefined;
         }
 
-        switch (valueType) {
-            case 'declaration':
-                value.value += 0;
-
-                this.value =
-                    (typeof value.value === 'number')
-                        ? value.value : 0;
-
-                this.unit  =
-                    (typeof value.unit === 'string')
-                        ? value.unit : null;
-
-                this.type  = value.type;
-
-                break;
-            case 'inline':
-                if (this.dissassemble(value, type) === false) {
-                    return {};
-                }
-
-                break;
-            default: return {};
+        if (typeof this.types[typeName] != 'function') {
+            return undefined;
         }
+
+        var dissassembleResult;
+
+        var value =
+            (typeof value === 'object') ? value :
+            (typeof value === 'string') ?
+                (typeof
+                    (dissassembleResult = this.dissassemble(value)) ===
+                'object') ? dissassembleResult : {}
+            : {};
+
+        type = new this.types[typeName]();
+
+        type.type = typeName;
+
+        type.value =
+            (typeof value.value === 'number') ? value.value  :
+            (!isNaN(+value.value))            ? +value.value : 0;
+
+        type.unit = (typeof value.unit === 'string') ? value.unit : null;
+
+        return type;
     };
 
-    Element.Value.prototype.dissassemble = function(input, type) {
-        if (typeof type != 'string') {
-            return false;
-        }
-
+    Element.Value.prototype.dissassemble = function (input) {
         var parseResult = (/([+,-]?\d+\.?\d*)(\D*)/).exec(input);
 
         if (parseResult === null) {
             return false;
         }
 
-        this.value = +parseResult[1];
-        this.unit  =  parseResult[2];
-        this.type  =  type;
+        var result = {};
 
-        if (this.value === undefined) {
-            this.value = 0;
+        result.value = +parseResult[1];
+        result.unit  =  parseResult[2];
+
+        if (result.value === undefined) {
+            result.value = 0;
         }
 
-        if (this.unit === '')  {
-            this.unit = null;
+        if (result.unit === '')  {
+            result.unit = null;
         }
 
-        return true;
+        return result;
     };
 
-    Element.Value.prototype.assemble = function (roundValue) {
-        var value = (roundValue === true) ? Math.round(this.value) : this.value;
-        var unit  = (this.unit  === null) ? ''                     : this.unit;
+    Element.Value.prototype.group = function () {
+        var propertyGroup =
+            (this.type === 'width' || this.type === 'height') ? 'size'     :
+            (this.type === 'x'     || this.type === 'y'     ) ? 'position' :
+            'other';
 
-        return value + unit;
+        return propertyGroup;
     };
 
     Element.Value.prototype.apply = function (target) {
-        if (typeof target != 'object') {
-            return false;
+        var group = this.group();
+
+        var unit = (this.unit === null) ? '%' : this.unit;
+        var type = (unit === 'px') ? this : this.px(target, true);
+
+        var assembledValue = Math.round(type.value);
+
+        if (group === 'size') {
+            assembledValue = Math.abs(assembledValue);
         }
 
-        target.html.style[this.correct[this.type]] =
-            (this.unit === '%')
-                ? this.px(target, true).assemble(true)
-                : this.assemble();
+        assembledValue += 'px';
+
+        target.html.style[this.correct[this.type]] = assembledValue;
 
         var childKey, child;
 
@@ -332,7 +340,7 @@
             child[this.type].apply(child);
         }
 
-        return true;
+        return undefined;
     };
 
     Element.Value.prototype.px = function (context, recalc) {
@@ -340,27 +348,28 @@
             return this;
         }
 
-        if  (this.type != 'width' && this.type != 'height' &&
-             this.type != 'x'     && this.type != 'y')
-        {
-            return undefined;
-        }
-
         if (recalc != true && typeof this.cache === 'object') {
             return this.cache;
         }
 
-        var parent = context.parent, value;
+        var group = this.group();
 
-        value = (parent)
-                    ? (this.type === 'width' || this.type === 'height')
-                        ? parent[this.type].px(parent).value / 100 * this.value
-                        :
-                            parent[this.type].px(parent).value +
-                            parent[
-                                (this.type === 'x') ? 'width' : 'height'
-                            ].px(parent).value / 100 * this.value
-                    : 0
+        if (group === 'other') {
+            return undefined;
+        }
+
+        var parent = context.parent;
+
+        var value =
+            (typeof parent === 'object')
+                ? (group === 'size')
+                    ? parent[this.type].px(parent).value / 100 * this.value
+                    :
+                        parent[this.type].px(parent).value +
+                        parent[
+                            (this.type === 'x') ? 'width' : 'height'
+                        ].px(parent).value / 100 * this.value
+                : 0;
 
         this.cache = new Element.Value({
             type  : this.type,
@@ -372,12 +381,61 @@
     };
 
     Element.Value.prototype.correct = {
-        width   : 'width',
-        height  : 'height',
-        x       : 'left',
-        y       : 'top',
-        z_index : 'zIndex'
+        width  : 'width',
+        height : 'height',
+        x      : 'left',
+        y      : 'top'
     };
+
+    /* Value types */
+
+    Element.Value.prototype.types = {};
+
+
+    /* Width type */
+
+    Element.Value.prototype.types.width = function () {};
+    Element.Value.prototype.types.width.prototype = new Element.Value();
+
+
+    /* Height type */
+
+    Element.Value.prototype.types.height = function () {};
+    Element.Value.prototype.types.height.prototype = new Element.Value();
+
+
+    /* X type */
+
+    Element.Value.prototype.types.x = function () {};
+    Element.Value.prototype.types.x.prototype = new Element.Value();
+
+
+    /* Y Type */
+
+    Element.Value.prototype.types.y = function () {};
+    Element.Value.prototype.types.y.prototype = new Element.Value();
+
+
+    /* Z-index type */
+
+    Element.Value.prototype.types.z_index = function () {};
+    Element.Value.prototype.types.z_index.prototype = new Element.Value();
+
+    Element.Value.prototype.types.z_index.prototype.apply = function (target) {
+        target.html.style.zIndex = Math.round(this.value);
+    }
+
+
+    /* Opacity type */
+
+    Element.Value.prototype.types.opacity = function () {};
+    Element.Value.prototype.types.opacity.prototype = new Element.Value();
+
+
+    /* Rotate type */
+
+    Element.Value.prototype.types.rotate = function () {};
+    Element.Value.prototype.types.rotate.prototype = new Element.Value();
 
 
     /* Animation */
