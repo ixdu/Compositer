@@ -435,11 +435,28 @@
     Element.Value.prototype.types.opacity.prototype = new Element.Value();
 
     Element.Value.prototype.types.opacity.prototype.apply = function (target) {
+        if (arguments.callee.work === false) {
+            return undefined;
+        }
+
         var opacity = 1 - (Math.abs(this.value) / 100);
 
         opacity = (opacity < 0) ? 0 : opacity;
 
         target.html.style.opacity = opacity;
+
+        if (arguments.callee.work === undefined) {
+
+            if (+target.html.style.opacity === opacity) {
+                arguments.callee.work = true;
+            } else {
+                arguments.callee.work = false;
+
+                return undefined;
+            }
+        }
+
+        return undefined;
     };
 
 
@@ -461,9 +478,9 @@
 
     Animation.prototype.init = function(chain) {
         if (
-            chain === undefined        ||
-            chain.constructor != Array ||
-            chain.length < 1
+            chain             === undefined ||
+            chain.constructor !=  Array     ||
+            chain.length      <   1
         ) {
             return false;
         }
