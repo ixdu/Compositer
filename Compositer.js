@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.'
 
-  version 0.5
+  version 0.6.1
 */
 
 /* Compositer */
@@ -187,6 +187,55 @@
 
     Element.Image.prototype = new Element();
 
+    /* Text element */
+
+    Element.Text = function (object) {
+        this.html = document.createElement('span');
+
+        this.html.style.textAlign  = 'center';
+        this.html.style.whiteSpace = 'nowrap';
+
+        if (typeof object != 'object') {
+            object = {};
+        }
+
+        var check;
+
+        if (typeof object.text === 'string') {
+            this.html.textContent = object.text;
+
+            check = document.getElementById('text');
+
+            check.textContent = object.text;
+
+            this.clear = {
+                width : check.offsetWidth / 16,
+                height : check.offsetHeight / 16
+            };
+
+            check.textContent = '';
+        }
+
+        this.init(object);
+    }
+
+    Element.Text.prototype = new Element();
+
+    Element.Text.prototype.resized = function () {
+        if (typeof this.width != 'object' || typeof this.height != 'object') {
+            return undefined;
+        }
+
+        var fullWidth  = this.width.px().value  / this.clear.width,
+            fullHeight = this.height.px().value / this.clear.height;
+
+        var value = (fullWidth > fullHeight) ? fullHeight : fullWidth;
+
+        value = Math.round(value);
+
+        this.html.style.fontSize = value + 'px';
+    }
+
 
     /* Root element */
 
@@ -204,6 +253,18 @@
         this.html.style.position = 'fixed';
         this.html.style.margin   = '0px';
         this.html.style.padding  = '0px';
+
+        var text = document.createElement('span');
+
+        text.style.position = 'fixed';
+        text.style.margin   = '0px';
+        text.style.padding  = '0px';
+
+        text.style.fontSize = '16px';
+
+        text.id = 'text';
+
+        document.body.appendChild(text);
 
         var value, propertyName;
 
@@ -238,16 +299,6 @@
     };
 
     Element.root.childs = [];
-
-    Element.root.defaults = {
-        width   : {type : 'width',   value : 100,             unit : '%'  },
-        height  : {type : 'height',  value : 100,             unit : '%'  },
-        x       : {type : 'x',       value : 0,               unit : 'px' },
-        y       : {type : 'y',       value : 0,               unit : 'px' },
-        z_index : {type : 'z_index', value : 1                            },
-        opacity : {type : 'opacity', value : 0,               unit : '%'  },
-        rotate  : {type : 'rotate',  value : 0,               unit : 'deg'}
-    };
 
 
     /* Value */
@@ -336,6 +387,10 @@
         assembledValue += 'px';
 
         target.html.style[this.correct[this.type]] = assembledValue;
+
+        if (group === 'size' && typeof target.resized === 'function') {
+            target.resized();
+        }
 
         var childKey, child;
 
@@ -902,6 +957,18 @@
                 Element.pool.free(imageId);
 
                 return undefined;
+            }),
+
+            text_create : (function (object) {
+                var text = new Element.Text(object);
+
+                text.id(Element.pool.put(text));
+
+                return text.id();
+            }),
+
+            text_destroy : (function (textId) {
+               /* TODO */
             }),
 
 
