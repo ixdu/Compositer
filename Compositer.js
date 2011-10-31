@@ -131,7 +131,7 @@
         }
     };
 
-    Element.prototype.init = function (object) {
+    Element.prototype.prepare = function (object) {
         this.html.style.position = 'fixed';
         this.html.style.margin   = '0px';
         this.html.style.padding  = '0px';
@@ -174,7 +174,7 @@
 
         this.html = document.createElement('div');
 
-        this.init(object);
+        this.prepare(object);
     };
 
     Element.prototype.types.frame.prototype = new Element();
@@ -191,7 +191,7 @@
 
         this.html.alt = '';
 
-        this.init(object);
+        this.prepare(object);
     };
 
     Element.prototype.types.image.prototype = new Element();
@@ -221,7 +221,7 @@
             check.textContent = '';
         }
 
-        this.init(object);
+        this.prepare(object);
     }
 
     Element.prototype.types.text.prototype = new Element();
@@ -251,13 +251,6 @@
             return false;
         }
 
-        this.html = document.body;
-
-        this.html.innerHtml = '';
-
-        this.html.style.position = 'fixed';
-        this.html.style.margin   = '0px';
-        this.html.style.padding  = '0px';
 
         var text = document.createElement('span');
 
@@ -271,15 +264,13 @@
 
         document.body.appendChild(text);
 
-        var value, propertyName;
 
-        for (propertyName in this.defaults) {
-            value = new Element.Value(this.defaults[propertyName]);
+        this.html = document.body;
 
-            this[propertyName] = value;
+        this.html.innerHtml = '';
 
-            value.apply(this);
-        }
+        this.prepare({});
+
 
         var root = this, childKey, propertyKey;
 
