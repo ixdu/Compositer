@@ -99,7 +99,21 @@
 
     /* Element */
 
-    var Element = function () {};
+    var Element = function (type, object) {
+        if (typeof type != 'string') {
+            return undefined;
+        }
+
+        if (typeof this.types[type] != 'function') {
+            return undefined
+        }
+
+        if (typeof object != 'object') {
+            object = {};
+        }
+
+        return new this.types[type](object);
+    };
 
     Element.pool = new Pool();
 
@@ -149,31 +163,27 @@
     };
 
 
+    /* Element types */
+
+    Element.prototype.types = {};
+
     /* Frame element */
 
-    Element.Frame = function (object) {
+    Element.prototype.types.frame = function (object) {
         this.childs = [];
 
         this.html = document.createElement('div');
 
-        if (typeof object != 'object') {
-            object = {};
-        }
-
         this.init(object);
     };
 
-    Element.Frame.prototype = new Element();
+    Element.prototype.types.frame.prototype = new Element();
 
 
     /* Image element */
 
-    Element.Image = function (object) {
+    Element.prototype.types.image = function (object) {
         this.html = document.createElement('img');
-
-        if (typeof object != 'object') {
-            object = {};
-        }
 
         if (typeof object.source === 'string') {
             this.html.src = object.source;
@@ -184,19 +194,15 @@
         this.init(object);
     };
 
-    Element.Image.prototype = new Element();
+    Element.prototype.types.image.prototype = new Element();
 
     /* Text element */
 
-    Element.Text = function (object) {
+    Element.prototype.types.text = function (object) {
         this.html = document.createElement('span');
 
         this.html.style.textAlign  = 'center';
         this.html.style.whiteSpace = 'nowrap';
-
-        if (typeof object != 'object') {
-            object = {};
-        }
 
         var check;
 
@@ -218,9 +224,9 @@
         this.init(object);
     }
 
-    Element.Text.prototype = new Element();
+    Element.prototype.types.text.prototype = new Element();
 
-    Element.Text.prototype.resized = function () {
+    Element.prototype.types.text.prototype.resized = function () {
         if (typeof this.width != 'object' || typeof this.height != 'object') {
             return undefined;
         }
@@ -809,7 +815,7 @@
     Compositer.prototype = {
 
             frame_create : (function (object) {
-                var frame = new Element.Frame(object);
+                var frame = new Element('frame', object);
 
                 frame.id(Element.pool.put(frame));
 
@@ -897,7 +903,7 @@
 
 
             image_create : (function (object) {
-                var image = new Element.Image(object);
+                var image = new Element('image', object);
 
                 image.id(Element.pool.put(image));
 
@@ -919,7 +925,7 @@
             }),
 
             text_create : (function (object) {
-                var text = new Element.Text(object);
+                var text = new Element('text', object);
 
                 text.id(Element.pool.put(text));
 
