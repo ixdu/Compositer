@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.'
 
-  version 0.6
+  version 0.6.1
 */
 
 /* Compositer */
@@ -298,15 +298,6 @@
     };
 
     Element.root.childs = [];
-
-    Element.root.defaults = {
-        width   : {type : 'width',   value : 100,             unit : '%' },
-        height  : {type : 'height',  value : 100,             unit : '%' },
-        x       : {type : 'x',       value : 0,               unit : 'px'},
-        y       : {type : 'y',       value : 0,               unit : 'px'},
-        z_index : {type : 'z_index', value : 1                           },
-        opacity : {type : 'opacity', value : 0,               unit : '%' }
-    };
 
 
     /* Value */
