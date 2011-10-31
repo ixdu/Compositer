@@ -189,23 +189,50 @@
     /* Text element */
 
     Element.Text = function (object) {
-        this.html = document.createElement('span')
+        this.html = document.createElement('span');
+
+        this.html.style.textAlign  = 'center';
+        this.html.style.whiteSpace = 'nowrap';
 
         if (typeof object != 'object') {
             object = {};
         }
-        
+
+        var check;
+
         if (typeof object.text === 'string') {
             this.html.textContent = object.text;
+
+            check = document.getElementById('text');
+
+            check.textContent = object.text;
+
+            this.clear = {
+                width : check.offsetWidth / 16,
+                height : check.offsetHeight / 16
+            };
+
+            check.textContent = '';
         }
-        
+
         this.init(object);
     }
-    
+
     Element.Text.prototype = new Element();
-    
+
     Element.Text.prototype.resized = function () {
-        /* TODO */
+        if (typeof this.width != 'object' || typeof this.height != 'object') {
+            return undefined;
+        }
+
+        var fullWidth  = this.width.px().value  / this.clear.width,
+            fullHeight = this.height.px().value / this.clear.height;
+
+        var value = (fullWidth > fullHeight) ? fullHeight : fullWidth;
+
+        value = Math.round(value);
+
+        this.html.style.fontSize = value + 'px';
     }
 
 
@@ -225,6 +252,18 @@
         this.html.style.position = 'fixed';
         this.html.style.margin   = '0px';
         this.html.style.padding  = '0px';
+
+        var text = document.createElement('span');
+
+        text.style.position = 'fixed';
+        text.style.margin   = '0px';
+        text.style.padding  = '0px';
+
+        text.style.fontSize = '16px';
+
+        text.id = 'text';
+
+        document.body.appendChild(text);
 
         var value, propertyName;
 
@@ -356,6 +395,10 @@
         assembledValue += 'px';
 
         target.html.style[this.correct[this.type]] = assembledValue;
+
+        if (group === 'size' && typeof target.resized === 'function') {
+            target.resized();
+        }
 
         var childKey, child;
 
