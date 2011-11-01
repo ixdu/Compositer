@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.'
 
-  version 0.7.0
+  version 0.7.1
 */
 
 /* Compositer */
@@ -230,31 +230,29 @@
 
         var charKey, char, info,
             string = target.html.textContent,
-            size   = {width : 0, height : 0};
+            size   = {widthPxWeight : 0, heightPxWeight : 0};
 
         for (charKey in string) {
             char = string[charKey];
 
             info = this.size(char);
 
-            size.width  += info.width;
-            size.height  = Math.max(size.height, info.height);
+            size.widthPxWeight   += info.widthPxWeight;
+            size.heightPxWeight  =
+                Math.max(size.heightPxWeight, info.heightPxWeight);
         }
 
-        var widthPxWeight  = size.width  / 14,
-            heightPxWeight = size.height / 14,
-
-            width  = target.width.px().value,
+        var width  = target.width.px().value,
             height = target.height.px().value,
 
-            resultFontSizeWidth  = width  / widthPxWeight,
-            resultFontSizeHeight = height / heightPxWeight,
+            resultFontSizeWidth  = width  / size.widthPxWeight,
+            resultFontSizeHeight = height / size.heightPxWeight,
 
             resultFontSize =
                 (resultFontSizeWidth < resultFontSizeHeight)
                     ? resultFontSizeWidth : resultFontSizeHeight;
 
-        target.html.style.fontSize   = Math.round(resultFontSize) + 'px';
+        target.html.style.fontSize   = resultFontSize + 'px';
         target.html.style.lineHeight = height + 'px';
     };
 
@@ -268,8 +266,6 @@
         text.style.position   = 'fixed';
         text.style.margin     = '0px';
         text.style.padding    = '0px';
-
-        text.style.fontSize   = '14px';
 
         document.body.appendChild(text);
 
@@ -303,8 +299,30 @@
 
         text.textContent = char;
 
+        var fontSize, widthResults = [], heightResults = [];
+
+        for (fontSize = 60; fontSize <= 60; fontSize++) {
+            text.style.fontSize = fontSize + 'px';
+
+            widthResults.push(text.clientWidth / fontSize);
+            heightResults.push(text.clientHeight / fontSize);
+        }
+
+        var mathMiddle = function (values) {
+            var valueKey, sum = 0;
+
+            for (valueKey in values) {
+                sum += values[valueKey];
+            }
+
+            return sum / values.length;
+        }
+
         var info = {
-            char : char, width : text.clientWidth, height : text.clientHeight
+            char : char,
+
+            widthPxWeight  : mathMiddle(widthResults),
+            heightPxWeight : mathMiddle(heightResults)
         }
 
         return info;
