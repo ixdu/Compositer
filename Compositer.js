@@ -241,8 +241,8 @@
             size.height  = Math.max(size.height, info.height);
         }
 
-        var widthPxWeight  = size.width  / 16,
-            heightPxWeight = size.height / 16,
+        var widthPxWeight  = size.width  / 14,
+            heightPxWeight = size.height / 14,
 
             width  = target.width.px().value,
             height = target.height.px().value,
@@ -254,7 +254,7 @@
                 (resultFontSizeWidth < resultFontSizeHeight)
                     ? resultFontSizeWidth : resultFontSizeHeight;
 
-        target.html.style.fontSize = Math.round(resultFontSize) - 1 + 'px';
+        target.html.style.fontSize = Math.round(resultFontSize) + 'px';
     };
 
     Element.prototype.types.text.prototype.fontSize.init = function () {
@@ -268,7 +268,7 @@
         text.style.margin     = '0px';
         text.style.padding    = '0px';
 
-        text.style.fontSize   = '16px';
+        text.style.fontSize   = '14px';
 
         document.body.appendChild(text);
 
