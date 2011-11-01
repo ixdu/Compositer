@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.'
 
-  version 0.6.4
+  version 0.7.0
 */
 
 /* Compositer */
@@ -254,7 +254,8 @@
                 (resultFontSizeWidth < resultFontSizeHeight)
                     ? resultFontSizeWidth : resultFontSizeHeight;
 
-        target.html.style.fontSize = Math.round(resultFontSize) + 'px';
+        target.html.style.fontSize   = Math.round(resultFontSize) + 'px';
+        target.html.style.lineHeight = height + 'px';
     };
 
     Element.prototype.types.text.prototype.fontSize.init = function () {
