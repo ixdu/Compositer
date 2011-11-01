@@ -202,23 +202,10 @@
         this.html = document.createElement('span');
 
         this.html.style.textAlign  = 'center';
-        this.html.style.whiteSpace = 'nowrap';
-
-        var check;
+        this.html.style.whiteSpace = 'pre';
 
         if (typeof object.text === 'string') {
             this.html.textContent = object.text;
-
-            check = document.getElementById('text');
-
-            check.textContent = object.text;
-
-            this.clear = {
-                width : check.offsetWidth / 16,
-                height : check.offsetHeight / 16
-            };
-
-            check.textContent = '';
         }
 
         this.prepare(object);
@@ -231,14 +218,95 @@
             return undefined;
         }
 
-        var fullWidth  = this.width.px().value  / this.clear.width,
-            fullHeight = this.height.px().value / this.clear.height;
+        this.fontSize.apply(this);
+    };
 
-        var value = (fullWidth > fullHeight) ? fullHeight : fullWidth;
+    Element.prototype.types.text.prototype.fontSize = {}
 
-        value = Math.round(value);
+    Element.prototype.types.text.prototype.fontSize.apply = function (target) {
+        if (!this.init.already) {
+            this.init();
+        }
 
-        this.html.style.fontSize = value + 'px';
+        var charKey, char, info,
+            string = target.html.textContent,
+            size   = {width : 0, height : 0};
+
+        for (charKey in string) {
+            char = string[charKey];
+
+            info = this.size(char);
+
+            size.width  += info.width;
+            size.height  = Math.max(size.height, info.height);
+        }
+
+        var widthPxWeight  = size.width  / 16,
+            heightPxWeight = size.height / 16,
+
+            width  = target.width.px().value,
+            height = target.height.px().value,
+
+            resultFontSizeWidth  = width  / widthPxWeight,
+            resultFontSizeHeight = height / heightPxWeight,
+
+            resultFontSize =
+                (resultFontSizeWidth < resultFontSizeHeight)
+                    ? resultFontSizeWidth : resultFontSizeHeight;
+
+        target.html.style.fontSize = Math.round(resultFontSize) - 1 + 'px';
+    };
+
+    Element.prototype.types.text.prototype.fontSize.init = function () {
+        var text = document.createElement('span');
+
+        text.style.visibility = 'hidden';
+
+        text.style.whiteSpace = 'pre';
+
+        text.style.position   = 'fixed';
+        text.style.margin     = '0px';
+        text.style.padding    = '0px';
+
+        text.style.fontSize   = '16px';
+
+        document.body.appendChild(text);
+
+        this.testUnit = text;
+        this.pool = [];
+        this.init.already = true;
+
+        return undefined;
+    };
+
+    Element.prototype.types.text.prototype.fontSize.size = function (char) {
+        var pool = this.pool, poolKey, info;
+
+        for (poolKey in pool) {
+            info = pool[poolKey];
+
+            if (info.char === char) {
+                return info;
+            }
+        }
+
+        info = this.calc(char);
+
+        pool.push(info);
+
+        return info;
+    };
+
+    Element.prototype.types.text.prototype.fontSize.calc = function (char) {
+        var text = this.testUnit;
+
+        text.textContent = char;
+
+        var info = {
+            char : char, width : text.clientWidth, height : text.clientHeight
+        }
+
+        return info;
     };
 
 
@@ -251,26 +319,11 @@
             return false;
         }
 
-
-        var text = document.createElement('span');
-
-        text.style.position = 'fixed';
-        text.style.margin   = '0px';
-        text.style.padding  = '0px';
-
-        text.style.fontSize = '16px';
-
-        text.id = 'text';
-
-        document.body.appendChild(text);
-
-
         this.html = document.body;
 
         this.html.innerHtml = '';
 
         this.prepare({});
-
 
         var root = this, childKey, propertyKey;
 
