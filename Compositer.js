@@ -883,346 +883,337 @@
         }
     };
 
-    Compositer.prototype = {
+    Compositer.prototype.frame_create = function (object) {
+        var frame = new Element('frame', object);
 
-            frame_create : function (object) {
-                var frame = new Element('frame', object);
+        frame.id(Element.pool.put(frame));
 
-                frame.id(Element.pool.put(frame));
+        return frame.id();
+    };
 
-                return frame.id();
-            },
-
-            frame_destroy : function (frameId) {
-                if (typeof frameId !== 'number') {
-                    return undefined;
-                }
-
-                if (frameId === 0) {
-                    return undefined;
-                }
-
-                Element.pool.free(frameId);
-
-                return undefined;
-            },
-
-
-                frame_add : function (parentId, childId) {
-                    if (typeof parentId !== 'number' ||
-                        typeof childId  !== 'number')
-                    {
-                        return undefined;
-                    }
-
-                    var parent = Element.pool.take(parentId),
-                        child  = Element.pool.take(childId);
-
-                    if (parent === undefined) {
-                        return undefined;
-                    }
-
-                    if (child  === undefined) {
-                        return undefined;
-                    }
-
-                    parent.childs.push(child);
-                    child.parent = parent;
-
-                    parent.html.appendChild(child.html);
-
-                    var propertyKey;
-
-                    for (propertyKey in child.defaults) {
-                        child[propertyKey].apply(child);
-                    }
-
-                    return undefined;
-                },
-
-                frame_remove : function (elementId) {
-                    if (typeof elementId !== 'number') {
-                        return undefined;
-                    }
-
-                    var element = Element.pool.take(elementId);
-
-                    if (element === undefined) {
-                        return undefined;
-                    }
-
-                    var parent = element.parent;
-
-                    if (parent === undefined) {
-                        return undefined;
-                    }
-
-                    var childKey, child;
-
-                    for (childKey in parent) {
-                        child = parent[childKey];
-
-                        if (child === element) {
-                            delete parent[childKey];
-
-                            break;
-                        }
-                    }
-
-                    delete element.parent;
-
-                    return undefined;
-                },
-
-
-            image_create : function (object) {
-                var image = new Element('image', object);
-
-                image.id(Element.pool.put(image));
-
-                return image.id();
-            },
-
-            image_destroy : function (imageId) {
-                if (typeof imageId !== 'number') {
-                    return undefined;
-                }
-
-                if (imageId === 0) {
-                    return undefined;
-                }
-
-                Element.pool.free(imageId);
-
-                return undefined;
-            },
-
-            text_create : function (object) {
-                var text = new Element('text', object);
-
-                text.id(Element.pool.put(text));
-
-                return text.id();
-            },
-
-            text_destroy : function (textId) {
-               if (typeof textId !== 'number') {
-                    return undefined;
-                }
-
-                if (textId === 0) {
-                    return undefined;
-                }
-
-                Element.pool.free(textId);
-
-                return undefined;
-            },
-
-
-        anim_create : function (chain) {
-            if (typeof chain !== 'object') {
-                return undefined;
-            }
-
-            var animation = new Animation(chain);
-
-            if (animation.constructor !== Animation) {
-                return undefined;
-            }
-
-            return Animation.pool.put(animation);
-        },
-
-        anim_destroy : function (animId) {
-            if (typeof animId !== 'number') {
-                return undefined;
-            }
-
-            var animation = Animation.pool.take(animId);
-
-            if (animation === undefined) {
-                return undefined;
-            }
-
-            if (animation.binds.count === 0) {
-                return undefined;
-            }
-
-            Animation.pool.free(animId);
-
+    Compositer.prototype.frame_destroy = function (frameId) {
+        if (typeof frameId !== 'number') {
             return undefined;
-        },
+        }
 
+        if (frameId === 0) {
+            return undefined;
+        }
 
-            anim_bind : function(elementId, animationId) {
-                if (typeof elementId   !== 'number' ||
-                    typeof animationId !== 'number')
-                {
-                    return undefined;
-                }
+        Element.pool.free(frameId);
 
-                var element   = Element.pool.take(elementId),
-                    animation = Animation.pool.take(animationId);
+        return undefined;
+    };
 
-                if (element === undefined || animation === undefined) {
-                    return undefined;
-                }
+    Compositer.prototype.frame_add = function (parentId, childId) {
+        if (typeof parentId !== 'number' ||
+            typeof childId  !== 'number')
+        {
+            return undefined;
+        }
 
-                var bind = new Animation.Bind(element, animation);
+        var parent = Element.pool.take(parentId),
+            child  = Element.pool.take(childId);
 
-                animation.binds.put(bind);
+        if (parent === undefined) {
+            return undefined;
+        }
 
-                bind.id = Animation.Bind.pool.put(bind);
+        if (child  === undefined) {
+            return undefined;
+        }
 
-                return bind.id;
-            },
+        parent.childs.push(child);
+        child.parent = parent;
 
-            anim_unbind : function (bindId) {
-                if (typeof bindId !== 'number') {
-                    return undefined;
-                }
+        parent.html.appendChild(child.html);
 
-                var bind = Animation.Bind.pool.take(bindId);
+        var propertyKey;
 
-                if (bind === undefined) {
-                    return undefined;
-                }
+        for (propertyKey in child.defaults) {
+            child[propertyKey].apply(child);
+        }
 
-                bind.animation.binds.free(bindId);
-                Animation.Bind.pool.free(bindId);
+        return undefined;
+    };
 
-                return undefined;
-            },
+    Compositer.prototype.frame_remove = function (elementId) {
+        if (typeof elementId !== 'number') {
+            return undefined;
+        }
 
+        var element = Element.pool.take(elementId);
 
-            anim_start : function (bindId) {
-                if (typeof bindId !== 'number') {
-                    return undefined;
-                }
+        if (element === undefined) {
+            return undefined;
+        }
 
-                var bind = Animation.Bind.pool.take(bindId);
+        var parent = element.parent;
 
-                if (bind === undefined) {
-                    return undefined;
-                }
+        if (parent === undefined) {
+            return undefined;
+        }
 
-                bind.start();
+        var childKey, child;
 
-                return undefined;
-            },
+        for (childKey in parent) {
+            child = parent[childKey];
 
-            anim_stop : function (bindId) {
-                if (typeof bindId !== 'number') {
-                    return undefined;
-                }
+            if (child === element) {
+                delete parent[childKey];
 
-                var bind = Animation.Bind.pool.take(bindId);
-
-                if (bind === undefined) {
-                    return undefined;
-                }
-
-                bind.stop();
-
-                return undefined;
-            },
-
-
-        event_register : function (elementId, eventName) {
-            if (typeof elementId !== 'number' ||
-                typeof eventName !== 'string')
-            {
-                return undefined;
+                break;
             }
+        }
 
-            if (eventName === 'animation_stopped') {
-                var bind = Animation.Bind.pool.take(elementId);
+        delete element.parent;
 
-                if (bind !== undefined) {
-                    bind.callback = true;
-                }
+        return undefined;
+    };
 
-                return undefined;
-            }
+    Compositer.prototype.image_create = function (object) {
+        var image = new Element('image', object);
 
-            eventName = event.correct[eventName];
+        image.id(Element.pool.put(image));
 
-            if (eventName === undefined) {
-                return undefined;
-            }
+        return image.id();
+    };
 
-            if ((/mouse/).test(eventName)) {
-                var element = Element.pool.take(elementId);
+    Compositer.prototype.image_destroy = function (imageId) {
+        if (typeof imageId !== 'number') {
+            return undefined;
+        }
 
-                if (element === undefined) {
-                    return undefined;
-                }
+        if (imageId === 0) {
+            return undefined;
+        }
 
-                element.html[eventName] = event;
+        Element.pool.free(imageId);
 
-                return undefined;
-            }
+        return undefined;
+    };
 
-            if ((/key/).test(eventName)) {
-                document[eventName] = event;
+    Compositer.prototype.text_create = function (object) {
+        var text = new Element('text', object);
+
+        text.id(Element.pool.put(text));
+
+        return text.id();
+    };
+
+    Compositer.prototype.text_destroy = function (textId) {
+        if (typeof textId !== 'number') {
+            return undefined;
+        }
+
+        if (textId === 0) {
+            return undefined;
+        }
+
+        Element.pool.free(textId);
+
+        return undefined;
+    };
+
+    Compositer.prototype.anim_create = function (chain) {
+        if (typeof chain !== 'object') {
+            return undefined;
+        }
+
+        var animation = new Animation(chain);
+
+        if (animation.constructor !== Animation) {
+            return undefined;
+        }
+
+        return Animation.pool.put(animation);
+    };
+
+    Compositer.prototype.anim_destroy = function (animId) {
+        if (typeof animId !== 'number') {
+            return undefined;
+        }
+
+        var animation = Animation.pool.take(animId);
+
+        if (animation === undefined) {
+            return undefined;
+        }
+
+        if (animation.binds.count === 0) {
+            return undefined;
+        }
+
+        Animation.pool.free(animId);
+
+        return undefined;
+    };
+
+    Compositer.prototype.anim_bind = function(elementId, animationId) {
+        if (typeof elementId   !== 'number' ||
+            typeof animationId !== 'number')
+        {
+            return undefined;
+        }
+
+        var element   = Element.pool.take(elementId),
+            animation = Animation.pool.take(animationId);
+
+        if (element === undefined || animation === undefined) {
+            return undefined;
+        }
+
+        var bind = new Animation.Bind(element, animation);
+
+        animation.binds.put(bind);
+
+        bind.id = Animation.Bind.pool.put(bind);
+
+        return bind.id;
+    };
+
+    Compositer.prototype.anim_unbind = function (bindId) {
+        if (typeof bindId !== 'number') {
+            return undefined;
+        }
+
+        var bind = Animation.Bind.pool.take(bindId);
+
+        if (bind === undefined) {
+            return undefined;
+        }
+
+        bind.animation.binds.free(bindId);
+        Animation.Bind.pool.free(bindId);
+
+        return undefined;
+    };
+
+    Compositer.prototype.anim_start = function (bindId) {
+        if (typeof bindId !== 'number') {
+            return undefined;
+        }
+
+        var bind = Animation.Bind.pool.take(bindId);
+
+        if (bind === undefined) {
+            return undefined;
+        }
+
+        bind.start();
+
+        return undefined;
+    };
+
+    Compositer.prototype.anim_stop = function (bindId) {
+        if (typeof bindId !== 'number') {
+            return undefined;
+        }
+
+        var bind = Animation.Bind.pool.take(bindId);
+
+        if (bind === undefined) {
+            return undefined;
+        }
+
+        bind.stop();
+
+        return undefined;
+    };
+
+    Compositer.prototype.event_register = function (elementId, eventName) {
+        if (typeof elementId !== 'number' ||
+            typeof eventName !== 'string')
+        {
+            return undefined;
+        }
+
+        if (eventName === 'animation_stopped') {
+            var bind = Animation.Bind.pool.take(elementId);
+
+            if (bind !== undefined) {
+                bind.callback = true;
             }
 
             return undefined;
-        },
+        }
 
-        event_unregister : function (elementId, eventName) {
-            if (typeof elementId !== 'number') {
-                return undefined;
-            }
+        eventName = event.correct[eventName];
 
-            if (typeof eventName !== 'string') {
-                return undefined;
-            }
+        if (eventName === undefined) {
+            return undefined;
+        }
 
-            var element;
-
-            if (eventName === 'animation_stopped') {
-                element = Animation.Bind.pool.take(elementId);
-
-                if (element === undefined) {
-                    return undefined;
-                }
-
-                delete element.callback;
-
-                return undefined;
-            }
-
-            element = Element.pool.take (elementId);
+        if ((/mouse/).test(eventName)) {
+            var element = Element.pool.take(elementId);
 
             if (element === undefined) {
                 return undefined;
             }
 
-            eventName = event.correct[eventName];
-
-            if (eventName === undefined) {
-                return undefined;
-            }
-
-            if ((/mouse/).test(eventName)) {
-                delete element.html[eventName];
-
-                return undefined;
-            }
-
-            if ((/key/).test(eventName)) {
-                delete document[eventName];
-            }
-
-            return undefined;
-        },
-
-        events_callback_set : function (callback) {
-            event.callback = callback;
+            element.html[eventName] = event;
 
             return undefined;
         }
+
+        if ((/key/).test(eventName)) {
+            document[eventName] = event;
+        }
+
+        return undefined;
+    };
+
+    Compositer.prototype.event_unregister = function (elementId, eventName) {
+        if (typeof elementId !== 'number') {
+            return undefined;
+        }
+
+        if (typeof eventName !== 'string') {
+            return undefined;
+        }
+
+        var element;
+
+        if (eventName === 'animation_stopped') {
+            element = Animation.Bind.pool.take(elementId);
+
+            if (element === undefined) {
+                return undefined;
+            }
+
+            delete element.callback;
+
+            return undefined;
+        }
+
+        element = Element.pool.take (elementId);
+
+        if (element === undefined) {
+            return undefined;
+        }
+
+        eventName = event.correct[eventName];
+
+        if (eventName === undefined) {
+            return undefined;
+        }
+
+        if ((/mouse/).test(eventName)) {
+            delete element.html[eventName];
+
+            return undefined;
+        }
+
+        if ((/key/).test(eventName)) {
+            delete document[eventName];
+        }
+
+        return undefined;
+    };
+
+    Compositer.prototype.events_callback_set = function (callback) {
+        event.callback = callback;
+
+        return undefined;
     };
 }());
