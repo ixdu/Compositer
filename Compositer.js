@@ -118,8 +118,10 @@
     Element.pool = new Pool();
 
     Element.prototype.id = function (id) {
+        var parseResult;
+
         if (typeof id !== 'number') {
-            var parseResult = (/^_(\d+)$/).exec(this.html.id);
+            parseResult = (/^_(\d+)$/).exec(this.html.id);
 
             if (parseResult !== null) {
                 return +parseResult[1];
@@ -344,15 +346,13 @@
 
         this.prepare({});
 
-        var root = this, childKey, propertyKey;
+        var root = this, childKey, propertyKey, child;
 
         window.onresize = function () {
             root.width.value  = wsSize().width;
             root.height.value = wsSize().height;
 
             root.width.apply(root); root.height.apply(root);
-
-            var childKey, child, propertyKey;
 
             for (childKey in root.childs) {
                 child = root.childs[childKey];
@@ -441,12 +441,12 @@
     };
 
     Element.Value.prototype.apply = function (target) {
-        var group = this.group();
+        var group = this.group(),
 
-        var unit = (this.unit === null) ? '%' : this.unit;
-        var type = (unit === 'px') ? this : this.px(target, true);
+        unit = (this.unit === null) ? '%' : this.unit,
+        type = (unit === 'px') ? this : this.px(target, true),
 
-        var assembledValue = Math.round(type.value);
+        assembledValue = Math.round(type.value);
 
         if (group === 'size') {
             assembledValue = Math.abs(assembledValue);
@@ -485,9 +485,9 @@
             return undefined;
         }
 
-        var parent = context.parent;
+        var parent = context.parent,
 
-        var value =
+        value =
             (typeof parent === 'object')
                 ? (group === 'size')
                     ? parent[this.type].px(parent).value / 100 * this.value
@@ -737,12 +737,12 @@
         var delay =
             (arguments.callee.last)
                 ? (new Date()).getTime() - arguments.callee.last.getTime()
-                : 1000 / arguments.callee.maxFps;
+                : 1000 / arguments.callee.maxFps,
 
 
-        var pool = arguments.callee.pool;
+        pool = arguments.callee.pool,
 
-        var poolId, more;
+        poolId, more;
 
         if (pool.count > 0) {
             for (poolId in pool.pool) {
@@ -797,9 +797,9 @@
         var eventGroup =
             (/mouse/).test(event.type) ? 'mouse' :
             (/key/).test(event.type)   ? 'key'   :
-                null;
+                null,
 
-        var eventName = arguments.callee.correct[event.type];
+        eventName = arguments.callee.correct[event.type];
 
         if (eventName === undefined) {
             return undefined;
