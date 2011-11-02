@@ -582,14 +582,12 @@
         var value = 'rotate(' + rotate + 'deg)';
 
         if (arguments.callee.prefix === undefined) {
-            var list = ['-moz-', '-webkit-', '-o-', '-ms-'];
+            var list = ['Moz', 'Webkit', 'O', 'ms'];
 
             for (var prefixKey in list) {
                 var prefix = list[prefixKey];
 
-                target.html.style.setProperty(prefix + 'transform', value, null);
-
-                if (target.html.style.getPropertyValue(prefix + 'transform') === value) {
+                if (target.html.style[prefix + 'Transform'] != undefined) {
                     arguments.callee.prefix = prefix;
 
                     var found = true;
@@ -605,11 +603,11 @@
             }
         }
 
-        if (arguments.callee.prefix === '-ms-') {
-            target.html.style.setProperty(arguments.callee.prefix + 'transform', '', null);
+        if (arguments.callee.prefix === 'ms') {
+            target.html.style[arguments.callee.prefix + 'Transform'] = '';
         }
 
-        target.html.style.setProperty(arguments.callee.prefix + 'transform', value, null);
+        target.html.style[arguments.callee.prefix + 'Transform'] = value;
     };
 
 
