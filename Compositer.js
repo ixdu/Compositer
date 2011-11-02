@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.'
 
-  version 0.7.1
+  version 0.7.2
 */
 
 /* Compositer */
@@ -938,12 +938,12 @@
                     return undefined;
                 },
 
-                frame_remove : function (frameId) {
-                    if (typeof frameId !== 'number') {
+                frame_remove : function (elementId) {
+                    if (typeof elementId !== 'number') {
                         return undefined;
                     }
 
-                    var element = Element.pool.take(frameId);
+                    var element = Element.pool.take(elementId);
 
                     if (element === undefined) {
                         return undefined;
