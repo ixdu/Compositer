@@ -938,12 +938,12 @@
                     return undefined;
                 },
 
-                frame_remove : function (frameId) {
-                    if (typeof frameId !== 'number') {
+                frame_remove : function (elementId) {
+                    if (typeof elementId !== 'number') {
                         return undefined;
                     }
 
-                    var element = Element.pool.take(frameId);
+                    var element = Element.pool.take(elementId);
 
                     if (element === undefined) {
                         return undefined;
