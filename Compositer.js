@@ -169,6 +169,7 @@
 
     Element.prototype.types = {};
 
+
     /* Frame element */
 
     Element.prototype.types.frame = function (object) {
@@ -198,6 +199,7 @@
 
     Element.prototype.types.image.prototype = new Element();
 
+
     /* Text element */
 
     Element.prototype.types.text = function (object) {
@@ -207,7 +209,7 @@
         this.html.style.whiteSpace = 'pre';
 
         if (typeof object.text === 'string') {
-            this.html.textContent = object.text;
+            this.html.innerHTML = object.text;
         }
 
         this.prepare(object);
@@ -231,15 +233,15 @@
         }
 
         var charKey, char, info,
-            string = target.html.textContent,
+            string = target.html.innerHTML,
             size   = {widthPxWeight : 0, heightPxWeight : 0};
 
-        for (charKey in string) {
+        for (charKey = 0; charKey < string.length; charKey++) {
             char = string[charKey];
 
             info = this.size(char);
 
-            size.widthPxWeight   += info.widthPxWeight;
+            size.widthPxWeight  += info.widthPxWeight;
             size.heightPxWeight  =
                 Math.max(size.heightPxWeight, info.heightPxWeight);
         }
@@ -299,11 +301,11 @@
     Element.prototype.types.text.prototype.fontSize.calc = function (char) {
         var text = this.testUnit;
 
-        text.textContent = char;
+        text.innerHTML = char;
 
         var fontSize, widthResults = [], heightResults = [];
 
-        for (fontSize = 60; fontSize <= 60; fontSize++) {
+        for (fontSize = 127; fontSize <= 127; fontSize++) {
             text.style.fontSize = fontSize + 'px';
 
             widthResults.push(text.clientWidth / fontSize);
