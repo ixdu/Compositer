@@ -19,7 +19,7 @@
 */
 
 /* Compositer */
-(function () {
+var Compositer = (function () {
 
     /* Universal method to take window size in different browsers */
 
@@ -141,15 +141,17 @@
         var value, propertyName;
 
         for (propertyName in this.defaults) {
-            if (typeof object[propertyName] === 'string') {
-                value = new Element.Value(object[propertyName], propertyName);
-            } else {
-                value = new Element.Value(this.defaults[propertyName]);
+            if (this.defaults.hasOwnProperty(propertyName)) {
+                if (typeof object[propertyName] === 'string') {
+                    value = new Element.Value(object[propertyName], propertyName);
+                } else {
+                    value = new Element.Value(this.defaults[propertyName]);
+                }
+
+                this[propertyName] = value;
+
+                value.apply(this);
             }
-
-            this[propertyName] = value;
-
-            value.apply(this);
         }
 
         return undefined;
@@ -316,10 +318,14 @@
             var childKey, propertyKey, child;
 
             for (childKey in root.childs) {
-                child = root.childs[childKey];
+                if (root.childs.hasOwnProperty(childKey)) {
+                    child = root.childs[childKey];
 
-                for (propertyKey in child.defaults) {
-                    child[propertyKey].apply(child);
+                    for (propertyKey in child.defaults) {
+                        if (child.defaults.hasOwnProperty(propertyKey)) {
+                            child[propertyKey].apply(child);
+                        }
+                    }
                 }
             }
         };
@@ -424,8 +430,10 @@
         var childKey, child;
 
         for (childKey in target.childs) {
-            child = target.childs[childKey];
-            child[this.type].apply(child);
+            if (target.childs.hasOwnProperty(childKey)) {
+                child = target.childs[childKey];
+                child[this.type].apply(child);
+            }
         }
 
         return undefined;
@@ -627,7 +635,9 @@
         var actionName;
 
         for (actionName in act.actions) {
-            this.vectors[actionName] = act.actions[actionName];
+            if (act.actions.hasOwnProperty(actionName)) {
+                this.vectors[actionName] = act.actions[actionName];
+            }
         }
 
         return true;
@@ -663,17 +673,19 @@
         var vectorId, vectorOffset, step;
 
         for (vectorId in this.vectors) {
-            vectorOffset = this.vectors[vectorId];
+            if (this.vectors.hasOwnProperty(vectorId)) {
+                vectorOffset = this.vectors[vectorId];
 
-            step =
-                (last) ?
-                    vectorOffset :
-                    (vectorOffset / (this.duration / delay));
+                step =
+                    (last) ?
+                        vectorOffset :
+                        (vectorOffset / (this.duration / delay));
 
-            this.element[vectorId].value += step;
-            this.element[vectorId].apply(this.element);
+                this.element[vectorId].value += step;
+                this.element[vectorId].apply(this.element);
 
-            this.vectors[vectorId] -= step;
+                this.vectors[vectorId] -= step;
+            }
         }
 
         this.duration = this.duration - delay;
@@ -709,10 +721,12 @@
 
         if (pool.count > 0) {
             for (poolId in pool.pool) {
-                var bind = pool.pool[poolId];
+                if (pool.pool.hasOwnProperty(poolId)) {
+                    var bind = pool.pool[poolId];
 
-                if (bind) {
-                    bind.blink(delay);
+                    if (bind) {
+                        bind.blink(delay);
+                    }
                 }
             }
 
@@ -846,7 +860,7 @@
 
     /* Compositer */
 
-    Compositer = function () {
+    var Compositer = function () {
         var root = Element.root.init();
 
         if (typeof root === 'object') {
@@ -908,7 +922,9 @@
         var propertyKey;
 
         for (propertyKey in child.defaults) {
-            child[propertyKey].apply(child);
+            if (child.defaults.hasOwnProperty(propertyKey)) {
+                child[propertyKey].apply(child);
+            }
         }
 
         return undefined;
@@ -934,12 +950,14 @@
         var childKey, child;
 
         for (childKey in parent) {
-            child = parent[childKey];
+            if (parent.hasOwnProperty(childKey)) {
+                child = parent[childKey];
 
-            if (child === element) {
-                delete parent[childKey];
+                if (child === element) {
+                    delete parent[childKey];
 
-                break;
+                    break;
+                }
             }
         }
 
@@ -1193,4 +1211,6 @@
 
         return undefined;
     };
+    
+    return Compositer;
 }());
