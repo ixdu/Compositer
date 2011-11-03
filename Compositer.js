@@ -188,16 +188,20 @@
     Element.prototype.types.image = function (object) {
         this.html = document.createElement('img');
 
-        if (typeof object.source === 'string') {
-            this.html.src = object.source;
-        }
-
-        this.html.alt = '';
+        this.init(object);
 
         this.prepare(object);
     };
 
     Element.prototype.types.image.prototype = new Element();
+
+    Element.prototype.types.image.prototype.init = function (object) {
+        if (typeof object.source === 'string') {
+            this.html.src = object.source;
+        }
+
+        this.html.alt = '';
+    };
 
 
     /* Text element */
@@ -209,6 +213,14 @@
         this.html.style.textAlign  = 'center';
         this.html.style.whiteSpace = 'pre';
 
+        this.init(object);
+
+        this.prepare(object);
+    };
+
+    Element.prototype.types.text.prototype = new Element();
+
+    Element.prototype.types.text.prototype.init = function (object) {
         if (typeof object.text === 'string') {
             this.html.innerHTML = object.text;
         }
@@ -216,11 +228,7 @@
         if (typeof object.color === 'string') {
             this.html.style.color = object.color;
         }
-
-        this.prepare(object);
     };
-
-    Element.prototype.types.text.prototype = new Element();
 
     Element.prototype.types.text.prototype.resized = function () {
         if (typeof this.width !== 'object' || typeof this.height !== 'object') {
@@ -273,7 +281,7 @@
         document.body.removeChild(span);
 
         arguments.callee.already = true;
-    }
+    };
 
 
     /* Root element */
