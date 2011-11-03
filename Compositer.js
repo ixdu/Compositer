@@ -793,8 +793,24 @@
                 elementId = 0;
 
                 eventData = {
-                    key_obj : {group_id : 0, keynum : event.keyCode}
+                    key_obj :
+                        {
+                            group_id : 0, keynum : event.keyCode,
+                            key_modificators : {}
+                        }
                 };
+
+                if (event.ctrlKey) {
+                    eventData.key_obj.key_modificators.ctrl  = true;
+                }
+
+                if (event.shiftKey) {
+                    eventData.key_obj.key_modificators.shift = true;
+                }
+
+                if (event.metaKey) {
+                    eventData.key_obj.key_modificators.alt   = true;
+                }
             break;
             default: return undefined;
         }
