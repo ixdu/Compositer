@@ -468,6 +468,7 @@
         y      : 'top'
     };
 
+
     /* Value types */
 
     Element.Value.prototype.types = {};
@@ -557,7 +558,7 @@
     Animation.prototype.init = function(chain) {
         if (
             chain             === undefined ||
-            chain.constructor !==  Array     ||
+            chain.constructor !== Array     ||
             chain.length      <   1
         ) {
             return false;
@@ -568,6 +569,7 @@
 
         return true;
     };
+
 
     /* Animation bind */
 
