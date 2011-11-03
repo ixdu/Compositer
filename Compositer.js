@@ -177,11 +177,17 @@
 
         this.html = document.createElement('div');
 
+        this.init(object);
         this.prepare(object);
     };
 
     Element.prototype.types.frame.prototype = new Element();
 
+    Element.prototype.types.frame.prototype.init = function (object) {
+        if (typeof object.color === 'string') {
+            this.html.style.backgroundColor = object.color;
+        }
+    }
 
     /* Image element */
 
