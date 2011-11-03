@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.'
 
-  version 0.7.2
+  version 0.7.3
 */
 
 /* Compositer */
@@ -205,6 +205,7 @@
     Element.prototype.types.text = function (object) {
         this.html = document.createElement('span');
 
+        this.html.style.fontFamily = 'monospace';
         this.html.style.textAlign  = 'center';
         this.html.style.whiteSpace = 'pre';
 
@@ -222,115 +223,53 @@
             return undefined;
         }
 
-        this.fontSize.apply(this);
+        this.fontSize(this);
     };
 
-    Element.prototype.types.text.prototype.fontSize = {}
-
-    Element.prototype.types.text.prototype.fontSize.apply = function (target) {
-        if (!this.init.already) {
-            this.init();
+    Element.prototype.types.text.prototype.fontSize = function (target) {
+        if (arguments.callee.init.already === undefined) {
+            arguments.callee.init();
         }
 
-        var charKey, char, info,
-            string = target.html.innerHTML,
-            size   = {widthPxWeight : 0, heightPxWeight : 0};
+        var string = target.html.innerHTML,
 
-        for (charKey = 0; charKey < string.length; charKey++) {
-            char = string[charKey];
-
-            info = this.size(char);
-
-            size.widthPxWeight  += info.widthPxWeight;
-            size.heightPxWeight  =
-                Math.max(size.heightPxWeight, info.heightPxWeight);
-        }
-
-        var width  = target.width.px().value,
+            width  = target.width.px().value,
             height = target.height.px().value,
 
-            resultFontSizeWidth  = width  / size.widthPxWeight,
-            resultFontSizeHeight = height / size.heightPxWeight,
+            widthWeight = arguments.callee.widthWeight,
 
-            resultFontSize =
-                (resultFontSizeWidth < resultFontSizeHeight)
-                    ? resultFontSizeWidth : resultFontSizeHeight;
+            font   = {
+                width  : width / string.length * widthWeight,
+                height : height
+            },
 
-        target.html.style.fontSize   = resultFontSize + 'px';
-        target.html.style.lineHeight = height + 'px';
+            fontSize = (font.width < font.height) ? font.width : font.height;
+
+        target.html.style.fontSize   = fontSize + 'px';
+        target.html.style.lineHeight = height   + 'px';
     };
 
     Element.prototype.types.text.prototype.fontSize.init = function () {
-        var text = document.createElement('span');
+        var span = document.createElement('span'), fontSize = 16;
 
-        text.style.visibility = 'hidden';
+        span.innerHTML        = 'X';
 
-        text.style.whiteSpace = 'pre';
+        span.style.position   = 'fixed';
 
-        text.style.position   = 'fixed';
-        text.style.margin     = '0px';
-        text.style.padding    = '0px';
+        span.style.margin     = '0px';
+        span.style.padding    = '0px';
 
-        document.body.appendChild(text);
+        span.style.fontFamily = 'monospace';
+        span.style.fontSize   = fontSize + 'px';
 
-        this.testUnit = text;
-        this.pool = [];
-        this.init.already = true;
+        document.body.appendChild(span);
 
-        return undefined;
-    };
+        this.widthWeight = fontSize / span.clientWidth;
 
-    Element.prototype.types.text.prototype.fontSize.size = function (char) {
-        var pool = this.pool, poolKey, info;
+        document.body.removeChild(span);
 
-        for (poolKey in pool) {
-            info = pool[poolKey];
-
-            if (info.char === char) {
-                return info;
-            }
-        }
-
-        info = this.calc(char);
-
-        pool.push(info);
-
-        return info;
-    };
-
-    Element.prototype.types.text.prototype.fontSize.calc = function (char) {
-        var text = this.testUnit;
-
-        text.innerHTML = char;
-
-        var fontSize, widthResults = [], heightResults = [];
-
-        for (fontSize = 127; fontSize <= 127; fontSize++) {
-            text.style.fontSize = fontSize + 'px';
-
-            widthResults.push(text.clientWidth / fontSize);
-            heightResults.push(text.clientHeight / fontSize);
-        }
-
-        var mathMiddle = function (values) {
-            var valueKey, sum = 0;
-
-            for (valueKey in values) {
-                sum += values[valueKey];
-            }
-
-            return sum / values.length;
-        }
-
-        var info = {
-            char : char,
-
-            widthPxWeight  : mathMiddle(widthResults),
-            heightPxWeight : mathMiddle(heightResults)
-        }
-
-        return info;
-    };
+        arguments.callee.already = true;
+    }
 
 
     /* Root element */
