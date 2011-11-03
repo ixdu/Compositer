@@ -48,14 +48,14 @@
                 );
             default:
                 arguments.callee.way =
-                    (window.innerWidth
-                        && window.innerHeight) ? 1 :
-                    (document.body
-                        && document.body.clientWidth
-                        && document.body.clientHeight) ? 2 :
-                    (document.documentElement
-                        && document.documentElement.clientWidth
-                        && document.documentElement.clientHeight) ? 3 : 4;
+                    (window.innerWidth &&
+                        window.innerHeight) ? 1 :
+                    (document.body &&
+                        document.body.clientWidth &&
+                        document.body.clientHeight) ? 2 :
+                    (document.documentElement &&
+                        document.documentElement.clientWidth &&
+                        document.documentElement.clientHeight) ? 3 : 4;
 
                 return arguments.callee();
         }
@@ -187,7 +187,7 @@
         if (typeof object.color === 'string') {
             this.html.style.backgroundColor = object.color;
         }
-    }
+    };
 
     /* Image element */
 
@@ -305,13 +305,15 @@
 
         this.prepare({});
 
-        var root = this, childKey, propertyKey, child;
+        var root = this;
 
         window.onresize = function () {
             root.width.value  = wsSize().width;
             root.height.value = wsSize().height;
 
             root.width.apply(root); root.height.apply(root);
+
+            var childKey, propertyKey, child;
 
             for (childKey in root.childs) {
                 child = root.childs[childKey];
@@ -368,7 +370,7 @@
     };
 
     Element.Value.prototype.dissassemble = function (input) {
-        var parseResult = (/([+,-]?\d+\.?\d*)(\D*)/).exec(input);
+        var parseResult = (/([+,\-]?\d+\.?\d*)(\D*)/).exec(input);
 
         if (parseResult === null) {
             return false;
@@ -447,16 +449,16 @@
         var parent = context.parent,
 
         value =
-            (typeof parent === 'object')
-                ? (group === 'size')
-                    ? parent[this.type].px(parent).value / 100 * this.value
-                    :
+            (typeof parent === 'object') ?
+                (group === 'size') ?
+                    parent[this.type].px(parent).value / 100 * this.value :
                         parent[this.type].px(parent).value +
                         parent[
                             (this.type === 'x') ? 'width' : 'height'
-                        ].px(parent).value / 100 * this.value
-                : (this.type === 'x' || this === 'y') ? 0 :
-                    (this.type === 'width') ? wsSize().width : wsSize().height;
+                        ].px(parent).value / 100 * this.value :
+                    (this.type === 'x' || this === 'y') ? 0 :
+                        (this.type === 'width') ?
+                            wsSize().width : wsSize().height;
 
         this.cache = new Element.Value({
             type  : this.type,
@@ -664,9 +666,9 @@
             vectorOffset = this.vectors[vectorId];
 
             step =
-                (last)
-                    ? vectorOffset
-                    : (vectorOffset / (this.duration / delay));
+                (last) ?
+                    vectorOffset :
+                    (vectorOffset / (this.duration / delay));
 
             this.element[vectorId].value += step;
             this.element[vectorId].apply(this.element);
@@ -696,9 +698,9 @@
         arguments.callee.already = true;
 
         var delay =
-            (arguments.callee.last)
-                ? (new Date()).getTime() - arguments.callee.last.getTime()
-                : 1000 / arguments.callee.maxFps,
+            (arguments.callee.last) ?
+                (new Date()).getTime() - arguments.callee.last.getTime() :
+                1000 / arguments.callee.maxFps,
 
 
         pool = arguments.callee.pool,
@@ -740,7 +742,7 @@
 
     /* Event */
 
-    var event = function event (event) {
+    var event = function (event) {
         if (typeof arguments.callee.callback !== 'function') {
             return undefined;
         }
@@ -779,13 +781,13 @@
                     pointer_obj : [{
                         pointer_id : 0,
 
-                        x : (element.width.unit  === '%')
-                            ? (100 / element.width.px().value  * event.layerX)
-                            : event.layerX,
+                        x : (element.width.unit  === '%') ?
+                            (100 / element.width.px().value  * event.layerX) :
+                            event.layerX,
 
-                        y : (element.height.unit === '%')
-                            ? (100 / element.height.px().value * event.layerY)
-                            : event.layerY
+                        y : (element.height.unit === '%') ?
+                            (100 / element.height.px().value * event.layerY) :
+                            event.layerY
                     }]
                 };
             break;
