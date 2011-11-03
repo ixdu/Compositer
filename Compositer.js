@@ -213,6 +213,10 @@
             this.html.innerHTML = object.text;
         }
 
+        if (typeof object.color === 'string') {
+            this.html.style.color = object.color;
+        }
+
         this.prepare(object);
     };
 
