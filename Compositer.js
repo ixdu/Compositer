@@ -71,6 +71,8 @@ var Compositer = (function () {
 
     /* Pool */
 
+    /** @constructor */
+
     var Pool = function () {
         this.pool = []; this.available = []; this.count = 0;
 
@@ -105,6 +107,8 @@ var Compositer = (function () {
 
 
     /* Element */
+
+    /** @constructor */
 
     var Element = function (type, object) {
         if (typeof type !== 'string') {
@@ -152,7 +156,10 @@ var Compositer = (function () {
                 if (typeof object[propertyName] === 'string') {
                     value = new Element.Value(object[propertyName], propertyName);
                 } else {
-                    value = new Element.Value(this.defaults[propertyName]);
+                    value =
+                        new Element.Value(
+                            this.defaults[propertyName], undefined
+                        );
                 }
 
                 this[propertyName] = value;
@@ -346,6 +353,8 @@ var Compositer = (function () {
 
     /* Value */
 
+    /** @constructor */
+
     Element.Value = function (value, type) {
         var typeName =
             (typeof type === 'string') ? type :
@@ -472,7 +481,7 @@ var Compositer = (function () {
                         parent[
                             (this.type === 'x') ? 'width' : 'height'
                         ].px(parent).value / 100 * this.value :
-                    (this.type === 'x' || this === 'y') ? 0 :
+                    (this.type === 'x' || this.type === 'y') ? 0 :
                         (this.type === 'width') ?
                             wsSize.take().width : wsSize.take().height;
 
@@ -480,7 +489,7 @@ var Compositer = (function () {
             type  : this.type,
             value : value,
             unit  : 'px'
-        });
+        }, undefined);
 
         return this.cache;
     };
@@ -501,31 +510,31 @@ var Compositer = (function () {
     /* Width type */
 
     Element.Value.prototype.types.width = function () {};
-    Element.Value.prototype.types.width.prototype = new Element.Value();
+    Element.Value.prototype.types.width.prototype = new Element.Value(undefined, undefined);
 
 
     /* Height type */
 
     Element.Value.prototype.types.height = function () {};
-    Element.Value.prototype.types.height.prototype = new Element.Value();
+    Element.Value.prototype.types.height.prototype = new Element.Value(undefined, undefined);
 
 
     /* X type */
 
     Element.Value.prototype.types.x = function () {};
-    Element.Value.prototype.types.x.prototype = new Element.Value();
+    Element.Value.prototype.types.x.prototype = new Element.Value(undefined, undefined);
 
 
     /* Y Type */
 
     Element.Value.prototype.types.y = function () {};
-    Element.Value.prototype.types.y.prototype = new Element.Value();
+    Element.Value.prototype.types.y.prototype = new Element.Value(undefined, undefined);
 
 
     /* Z-index type */
 
     Element.Value.prototype.types.z_index = function () {};
-    Element.Value.prototype.types.z_index.prototype = new Element.Value();
+    Element.Value.prototype.types.z_index.prototype = new Element.Value(undefined, undefined);
 
     Element.Value.prototype.types.z_index.prototype.apply = function (target) {
         target.html.style.zIndex = Math.round(this.value);
@@ -535,7 +544,7 @@ var Compositer = (function () {
     /* Opacity type */
 
     Element.Value.prototype.types.opacity = function () {};
-    Element.Value.prototype.types.opacity.prototype = new Element.Value();
+    Element.Value.prototype.types.opacity.prototype = new Element.Value(undefined, undefined);
 
     Element.Value.prototype.types.opacity.prototype.apply = function (target) {
         if (this.constructor.prototype.work === false) {
@@ -566,10 +575,12 @@ var Compositer = (function () {
     /* Rotate type */
 
     Element.Value.prototype.types.rotate = function () {};
-    Element.Value.prototype.types.rotate.prototype = new Element.Value();
+    Element.Value.prototype.types.rotate.prototype = new Element.Value(undefined, undefined);
 
 
     /* Animation */
+
+    /** @constructor */
 
     var Animation = function (chain) {
         if (!this.init(chain)) {
@@ -597,7 +608,9 @@ var Compositer = (function () {
 
     /* Animation bind */
 
-    Animation.Bind = function(element, animation) {
+    /** @constructor */
+
+    Animation.Bind = function (element, animation) {
         if (this.init(element, animation) === false) {
             return {};
         }
@@ -618,7 +631,7 @@ var Compositer = (function () {
         this.animation = animation;
 
         this.act = 0;
-        this.initAct(this.act);
+        this.initAct(this.act, undefined);
 
         return true;
     };
@@ -628,7 +641,7 @@ var Compositer = (function () {
 
         if (act === undefined) {
             this.act = 0;
-            this.initAct(this.act);
+            this.initAct(this.act, undefined);
 
             this.stop();
 
@@ -654,7 +667,7 @@ var Compositer = (function () {
     Animation.Bind.prototype.start = function () {
         this.workerPoolId = Animation.worker.pool.put(this);
 
-        Animation.worker();
+        Animation.worker(undefined);
     };
 
     Animation.Bind.prototype.stop = function () {
