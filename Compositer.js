@@ -198,6 +198,7 @@ var Compositer = (function () {
         }
     };
 
+
     /* Image element */
 
     Element.prototype.types.image = function (object) {
@@ -537,7 +538,7 @@ var Compositer = (function () {
     Element.Value.prototype.types.opacity.prototype = new Element.Value();
 
     Element.Value.prototype.types.opacity.prototype.apply = function (target) {
-        if (arguments.callee.work === false) {
+        if (this.constructor.prototype.work === false) {
             return undefined;
         }
 
@@ -547,12 +548,12 @@ var Compositer = (function () {
 
         target.html.style.opacity = opacity;
 
-        if (arguments.callee.work === undefined) {
+        if (this.constructor.prototype.work === undefined) {
 
             if (+target.html.style.opacity === opacity) {
-                arguments.callee.work = true;
+                this.constructor.prototype.work = true;
             } else {
-                arguments.callee.work = false;
+                this.constructor.prototype.work = false;
 
                 return undefined;
             }
