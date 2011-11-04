@@ -720,7 +720,7 @@ var Compositer = (function () {
         var delay =
             (Animation.worker.last) ?
                 (new Date()).getTime() - Animation.worker.last.getTime() :
-                1000 / arguments.callee.maxFps,
+                1000 / Animation.worker.maxFps,
 
 
         pool = Animation.worker.pool,
