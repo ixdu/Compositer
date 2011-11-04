@@ -23,8 +23,26 @@ var Compositer = (function () {
 
     /* Universal method to take window size in different browsers */
 
-    var wsSize = function () {
-        switch (arguments.callee.way) {
+    var wsSize = {};
+
+    wsSize.detect = function () {
+        this.way =
+            (window.innerWidth &&
+                window.innerHeight) ? 1 :
+            (document.body &&
+                document.body.clientWidth &&
+                document.body.clientHeight) ? 2 :
+            (document.documentElement &&
+                document.documentElement.clientWidth &&
+                document.documentElement.clientHeight) ? 3 : 4;
+
+        return this.way;
+    };
+
+    wsSize.take = function () {
+        var way = (this.way === undefined) ? this.detect() : this.way;
+
+        switch (way) {
             case 1:
                 return {
                     width : window.innerWidth,
@@ -42,25 +60,14 @@ var Compositer = (function () {
                     width : document.documentElement.clientWidth,
                     height : document.documentElement.clientHeight
                 };
-            case 4:
+            default:
                 throw new Error(
                     'Can not detect window size in this browser'
                 );
-            default:
-                arguments.callee.way =
-                    (window.innerWidth &&
-                        window.innerHeight) ? 1 :
-                    (document.body &&
-                        document.body.clientWidth &&
-                        document.body.clientHeight) ? 2 :
-                    (document.documentElement &&
-                        document.documentElement.clientWidth &&
-                        document.documentElement.clientHeight) ? 3 : 4;
-
-                return arguments.callee();
         }
-    };
 
+        return undefined;
+    };
 
     /* Pool */
 
@@ -297,7 +304,7 @@ var Compositer = (function () {
     Element.root = new Element();
 
     Element.root.init = function () {
-        if (typeof document.body !== 'object' || typeof wsSize() !== 'object') {
+        if (typeof document.body !== 'object' || typeof wsSize.take() !== 'object') {
             return false;
         }
 
@@ -310,8 +317,8 @@ var Compositer = (function () {
         var root = this;
 
         window.onresize = function () {
-            root.width.value  = wsSize().width;
-            root.height.value = wsSize().height;
+            root.width.value  = wsSize.take().width;
+            root.height.value = wsSize.take().height;
 
             root.width.apply(root); root.height.apply(root);
 
@@ -466,7 +473,7 @@ var Compositer = (function () {
                         ].px(parent).value / 100 * this.value :
                     (this.type === 'x' || this === 'y') ? 0 :
                         (this.type === 'width') ?
-                            wsSize().width : wsSize().height;
+                            wsSize.take().width : wsSize.take().height;
 
         this.cache = new Element.Value({
             type  : this.type,
@@ -1211,6 +1218,6 @@ var Compositer = (function () {
 
         return undefined;
     };
-    
+
     return Compositer;
 }());
