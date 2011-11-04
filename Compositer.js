@@ -807,7 +807,7 @@ var Compositer = (function () {
 
         switch (eventGroup) {
             case 'mouse':
-                elementId = +(/^_(\d+)$/).exec(event.currentTarget.id)[1];
+                elementId = +(/^_(\d+)$/).exec(incident.currentTarget.id)[1];
 
                 element = Element.pool.take(elementId);
 
