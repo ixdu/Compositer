@@ -197,7 +197,7 @@ window['Compositer'] = (function () {
         this.prepare(object);
     };
 
-    Unit.prototype.types.frame.prototype = new Unit();
+    Unit.prototype.types.frame.prototype = new Unit(undefined, undefined);
 
     Unit.prototype.types.frame.prototype.init = function (object) {
         if (typeof object.color === 'string') {
@@ -216,7 +216,7 @@ window['Compositer'] = (function () {
         this.prepare(object);
     };
 
-    Unit.prototype.types.image.prototype = new Unit();
+    Unit.prototype.types.image.prototype = new Unit(undefined, undefined);
 
     Unit.prototype.types.image.prototype.init = function (object) {
         if (typeof object.source === 'string') {
@@ -241,7 +241,7 @@ window['Compositer'] = (function () {
         this.prepare(object);
     };
 
-    Unit.prototype.types.text.prototype = new Unit();
+    Unit.prototype.types.text.prototype = new Unit(undefined, undefined);
 
     Unit.prototype.types.text.prototype.init = function (object) {
         if (typeof object.text === 'string') {
@@ -309,7 +309,7 @@ window['Compositer'] = (function () {
 
     /* Root element */
 
-    Unit.root = new Unit();
+    Unit.root = new Unit(undefined, undefined);
 
     Unit.root.init = function () {
         if (typeof document.body !== 'object' || typeof wsSize.take() !== 'object') {
@@ -427,10 +427,10 @@ window['Compositer'] = (function () {
     Unit.Value.prototype.apply = function (target) {
         var group = this.group(),
 
-        unit = (this.unit === null) ? '%' : this.unit,
-        type = (unit === 'px') ? this : this.px(target, true),
+            unit = ((this.unit === null) ? '%' : this.unit),
+            type = ((unit === 'px') ? this : this.px(target, true)),
 
-        assembledValue = Math.round(type.value);
+            assembledValue = Math.round(type.value);
 
         if (group === 'size') {
             assembledValue = Math.abs(assembledValue);
@@ -655,9 +655,9 @@ window['Compositer'] = (function () {
 
         var actionName;
 
-        for (actionName in act.actions) {
-            if (act.actions.hasOwnProperty(actionName)) {
-                this.vectors[actionName] = act.actions[actionName];
+        for (actionName in act['actions']) {
+            if (act['actions'].hasOwnProperty(actionName)) {
+                this.vectors[actionName] = act['actions'][actionName];
             }
         }
 
@@ -900,7 +900,7 @@ window['Compositer'] = (function () {
 
         frame.id(Unit.pool.put(frame));
 
-        return frame.id();
+        return frame.id(undefined);
     };
 
     Compositer.prototype['frame_destroy'] = function (frameId) {
@@ -992,7 +992,7 @@ window['Compositer'] = (function () {
 
         image.id(Unit.pool.put(image));
 
-        return image.id();
+        return image.id(undefined);
     };
 
     Compositer.prototype['image_destroy'] = function (imageId) {
@@ -1014,7 +1014,7 @@ window['Compositer'] = (function () {
 
         text.id(Unit.pool.put(text));
 
-        return text.id();
+        return text.id(undefined);
     };
 
     Compositer.prototype['text_destroy'] = function (textId) {
