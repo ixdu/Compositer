@@ -710,20 +710,20 @@ var Compositer = (function () {
 
     Animation.worker = function (work) {
         if (!work) {
-            if (arguments.callee.already) {
+            if (Animation.worker.already) {
                 return undefined;
             }
         }
 
-        arguments.callee.already = true;
+        Animation.worker.already = true;
 
         var delay =
-            (arguments.callee.last) ?
-                (new Date()).getTime() - arguments.callee.last.getTime() :
+            (Animation.worker.last) ?
+                (new Date()).getTime() - Animation.worker.last.getTime() :
                 1000 / arguments.callee.maxFps,
 
 
-        pool = arguments.callee.pool,
+        pool = Animation.worker.pool,
 
         poolId, more;
 
@@ -742,17 +742,17 @@ var Compositer = (function () {
         }
 
         if (more !== true) {
-            arguments.callee.already = false;
-            delete arguments.callee.last;
+            Animation.worker.already = false;
+            delete Animation.worker.last;
 
             return undefined;
         }
 
-        arguments.callee.last = new Date();
+        Animation.worker.last = new Date();
 
         setTimeout(
             function() {Animation.worker(true);},
-            1000 / arguments.callee.maxFps
+            1000 / Animation.worker.maxFps
         );
 
         return undefined;
