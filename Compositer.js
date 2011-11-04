@@ -67,8 +67,6 @@ var Compositer = (function () {
                     'Can not detect window size in this browser'
                 );
         }
-
-        return undefined;
     };
 
     /* Pool */
