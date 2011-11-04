@@ -106,11 +106,11 @@ window['Compositer'] = (function () {
     };
 
 
-    /* Element */
+    /* Unit */
 
     /** @constructor */
 
-    var Element = function (type, object) {
+    var Unit = function (type, object) {
         if (typeof type !== 'string') {
             return undefined;
         }
@@ -126,9 +126,9 @@ window['Compositer'] = (function () {
         return new this.types[type](object);
     };
 
-    Element.pool = new Pool();
+    Unit.pool = new Pool();
 
-    Element.prototype.id = function (id) {
+    Unit.prototype.id = function (id) {
         var parseResult;
 
         if (typeof id !== 'number') {
@@ -144,7 +144,7 @@ window['Compositer'] = (function () {
         }
     };
 
-    Element.prototype.prepare = function (object) {
+    Unit.prototype.prepare = function (object) {
         this.html.style.position = 'fixed';
         this.html.style.margin   = '0px';
         this.html.style.padding  = '0px';
@@ -154,10 +154,10 @@ window['Compositer'] = (function () {
         for (propertyName in this.defaults) {
             if (this.defaults.hasOwnProperty(propertyName)) {
                 if (typeof object[propertyName] === 'string') {
-                    value = new Element.Value(object[propertyName], propertyName);
+                    value = new Unit.Value(object[propertyName], propertyName);
                 } else {
                     value =
-                        new Element.Value(
+                        new Unit.Value(
                             this.defaults[propertyName], undefined
                         );
                 }
@@ -171,7 +171,7 @@ window['Compositer'] = (function () {
         return undefined;
     };
 
-    Element.prototype.defaults = {
+    Unit.prototype.defaults = {
         width   : {type : 'width',   value : 100, unit : '%' },
         height  : {type : 'height',  value : 100, unit : '%' },
         x       : {type : 'x',       value : 0,   unit : 'px'},
@@ -181,14 +181,14 @@ window['Compositer'] = (function () {
     };
 
 
-    /* Element types */
+    /* Unit types */
 
-    Element.prototype.types = {};
+    Unit.prototype.types = {};
 
 
     /* Frame element */
 
-    Element.prototype.types.frame = function (object) {
+    Unit.prototype.types.frame = function (object) {
         this.childs = [];
 
         this.html = document.createElement('div');
@@ -197,9 +197,9 @@ window['Compositer'] = (function () {
         this.prepare(object);
     };
 
-    Element.prototype.types.frame.prototype = new Element();
+    Unit.prototype.types.frame.prototype = new Unit();
 
-    Element.prototype.types.frame.prototype.init = function (object) {
+    Unit.prototype.types.frame.prototype.init = function (object) {
         if (typeof object.color === 'string') {
             this.html.style.backgroundColor = object.color;
         }
@@ -208,7 +208,7 @@ window['Compositer'] = (function () {
 
     /* Image element */
 
-    Element.prototype.types.image = function (object) {
+    Unit.prototype.types.image = function (object) {
         this.html = document.createElement('img');
 
         this.init(object);
@@ -216,9 +216,9 @@ window['Compositer'] = (function () {
         this.prepare(object);
     };
 
-    Element.prototype.types.image.prototype = new Element();
+    Unit.prototype.types.image.prototype = new Unit();
 
-    Element.prototype.types.image.prototype.init = function (object) {
+    Unit.prototype.types.image.prototype.init = function (object) {
         if (typeof object.source === 'string') {
             this.html.src = object.source;
         }
@@ -229,7 +229,7 @@ window['Compositer'] = (function () {
 
     /* Text element */
 
-    Element.prototype.types.text = function (object) {
+    Unit.prototype.types.text = function (object) {
         this.html = document.createElement('span');
 
         this.html.style.fontFamily = 'monospace';
@@ -241,9 +241,9 @@ window['Compositer'] = (function () {
         this.prepare(object);
     };
 
-    Element.prototype.types.text.prototype = new Element();
+    Unit.prototype.types.text.prototype = new Unit();
 
-    Element.prototype.types.text.prototype.init = function (object) {
+    Unit.prototype.types.text.prototype.init = function (object) {
         if (typeof object.text === 'string') {
             this.html.innerHTML = object.text;
         }
@@ -253,7 +253,7 @@ window['Compositer'] = (function () {
         }
     };
 
-    Element.prototype.types.text.prototype.resized = function () {
+    Unit.prototype.types.text.prototype.resized = function () {
         if (typeof this.width !== 'object' || typeof this.height !== 'object') {
             return undefined;
         }
@@ -261,9 +261,9 @@ window['Compositer'] = (function () {
         this.fontSize.apply(this);
     };
 
-    Element.prototype.types.text.prototype.fontSize = {};
+    Unit.prototype.types.text.prototype.fontSize = {};
 
-    Element.prototype.types.text.prototype.fontSize.detect = function () {
+    Unit.prototype.types.text.prototype.fontSize.detect = function () {
         var span = document.createElement('span'), fontSize = 16;
 
         span.innerHTML        = 'X';
@@ -285,7 +285,7 @@ window['Compositer'] = (function () {
         return this.widthWeight;
     };
 
-    Element.prototype.types.text.prototype.fontSize.apply = function (target) {
+    Unit.prototype.types.text.prototype.fontSize.apply = function (target) {
         var widthWeight =
             (this.widthWeight === undefined) ?
                 this.detect() : this.widthWeight,
@@ -309,9 +309,9 @@ window['Compositer'] = (function () {
 
     /* Root element */
 
-    Element.root = new Element();
+    Unit.root = new Unit();
 
-    Element.root.init = function () {
+    Unit.root.init = function () {
         if (typeof document.body !== 'object' || typeof wsSize.take() !== 'object') {
             return false;
         }
@@ -348,14 +348,14 @@ window['Compositer'] = (function () {
         return this;
     };
 
-    Element.root.childs = [];
+    Unit.root.childs = [];
 
 
     /* Value */
 
     /** @constructor */
 
-    Element.Value = function (value, type) {
+    Unit.Value = function (value, type) {
         var typeName =
             (typeof type === 'string') ? type :
             (typeof value === 'object' &&
@@ -392,7 +392,7 @@ window['Compositer'] = (function () {
         return type;
     };
 
-    Element.Value.prototype.dissassemble = function (input) {
+    Unit.Value.prototype.dissassemble = function (input) {
         var parseResult = (/([+,\-]?\d+\.?\d*)(\D*)/).exec(input);
 
         if (parseResult === null) {
@@ -415,7 +415,7 @@ window['Compositer'] = (function () {
         return result;
     };
 
-    Element.Value.prototype.group = function () {
+    Unit.Value.prototype.group = function () {
         var propertyGroup =
             (this.type === 'width' || this.type === 'height') ? 'size'     :
             (this.type === 'x'     || this.type === 'y'     ) ? 'position' :
@@ -424,7 +424,7 @@ window['Compositer'] = (function () {
         return propertyGroup;
     };
 
-    Element.Value.prototype.apply = function (target) {
+    Unit.Value.prototype.apply = function (target) {
         var group = this.group(),
 
         unit = (this.unit === null) ? '%' : this.unit,
@@ -456,7 +456,7 @@ window['Compositer'] = (function () {
         return undefined;
     };
 
-    Element.Value.prototype.px = function (context, recalc) {
+    Unit.Value.prototype.px = function (context, recalc) {
         if (this.unit === 'px') {
             return this;
         }
@@ -485,7 +485,7 @@ window['Compositer'] = (function () {
                         (this.type === 'width') ?
                             wsSize.take().width : wsSize.take().height;
 
-        this.cache = new Element.Value({
+        this.cache = new Unit.Value({
             type  : this.type,
             value : value,
             unit  : 'px'
@@ -494,7 +494,7 @@ window['Compositer'] = (function () {
         return this.cache;
     };
 
-    Element.Value.prototype.correct = {
+    Unit.Value.prototype.correct = {
         width  : 'width',
         height : 'height',
         x      : 'left',
@@ -504,49 +504,49 @@ window['Compositer'] = (function () {
 
     /* Value types */
 
-    Element.Value.prototype.types = {};
+    Unit.Value.prototype.types = {};
 
 
     /* Width type */
 
-    Element.Value.prototype.types.width = function () {};
-    Element.Value.prototype.types.width.prototype = new Element.Value(undefined, undefined);
+    Unit.Value.prototype.types.width = function () {};
+    Unit.Value.prototype.types.width.prototype = new Unit.Value(undefined, undefined);
 
 
     /* Height type */
 
-    Element.Value.prototype.types.height = function () {};
-    Element.Value.prototype.types.height.prototype = new Element.Value(undefined, undefined);
+    Unit.Value.prototype.types.height = function () {};
+    Unit.Value.prototype.types.height.prototype = new Unit.Value(undefined, undefined);
 
 
     /* X type */
 
-    Element.Value.prototype.types.x = function () {};
-    Element.Value.prototype.types.x.prototype = new Element.Value(undefined, undefined);
+    Unit.Value.prototype.types.x = function () {};
+    Unit.Value.prototype.types.x.prototype = new Unit.Value(undefined, undefined);
 
 
     /* Y Type */
 
-    Element.Value.prototype.types.y = function () {};
-    Element.Value.prototype.types.y.prototype = new Element.Value(undefined, undefined);
+    Unit.Value.prototype.types.y = function () {};
+    Unit.Value.prototype.types.y.prototype = new Unit.Value(undefined, undefined);
 
 
     /* Z-index type */
 
-    Element.Value.prototype.types.z_index = function () {};
-    Element.Value.prototype.types.z_index.prototype = new Element.Value(undefined, undefined);
+    Unit.Value.prototype.types.z_index = function () {};
+    Unit.Value.prototype.types.z_index.prototype = new Unit.Value(undefined, undefined);
 
-    Element.Value.prototype.types.z_index.prototype.apply = function (target) {
+    Unit.Value.prototype.types.z_index.prototype.apply = function (target) {
         target.html.style.zIndex = Math.round(this.value);
     };
 
 
     /* Opacity type */
 
-    Element.Value.prototype.types.opacity = function () {};
-    Element.Value.prototype.types.opacity.prototype = new Element.Value(undefined, undefined);
+    Unit.Value.prototype.types.opacity = function () {};
+    Unit.Value.prototype.types.opacity.prototype = new Unit.Value(undefined, undefined);
 
-    Element.Value.prototype.types.opacity.prototype.apply = function (target) {
+    Unit.Value.prototype.types.opacity.prototype.apply = function (target) {
         if (this.constructor.prototype.work === false) {
             return undefined;
         }
@@ -574,8 +574,8 @@ window['Compositer'] = (function () {
 
     /* Rotate type */
 
-    Element.Value.prototype.types.rotate = function () {};
-    Element.Value.prototype.types.rotate.prototype = new Element.Value(undefined, undefined);
+    Unit.Value.prototype.types.rotate = function () {};
+    Unit.Value.prototype.types.rotate.prototype = new Unit.Value(undefined, undefined);
 
 
     /* Animation */
@@ -809,7 +809,7 @@ window['Compositer'] = (function () {
             case 'mouse':
                 elementId = +(/^_(\d+)$/).exec(incident.currentTarget.id)[1];
 
-                element = Element.pool.take(elementId);
+                element = Unit.pool.take(elementId);
 
                 eventData = {
                     group_id    : 0,
@@ -882,10 +882,10 @@ window['Compositer'] = (function () {
     /* Compositer */
 
     var Compositer = function () {
-        var root = Element.root.init();
+        var root = Unit.root.init();
 
         if (typeof root === 'object') {
-            root.id(Element.pool.put(root));
+            root.id(Unit.pool.put(root));
 
             return undefined;
         } else {
@@ -896,9 +896,9 @@ window['Compositer'] = (function () {
     };
 
     Compositer.prototype['frame_create'] = function (object) {
-        var frame = new Element('frame', object);
+        var frame = new Unit('frame', object);
 
-        frame.id(Element.pool.put(frame));
+        frame.id(Unit.pool.put(frame));
 
         return frame.id();
     };
@@ -912,7 +912,7 @@ window['Compositer'] = (function () {
             return undefined;
         }
 
-        Element.pool.free(frameId);
+        Unit.pool.free(frameId);
 
         return undefined;
     };
@@ -924,8 +924,8 @@ window['Compositer'] = (function () {
             return undefined;
         }
 
-        var parent = Element.pool.take(parentId),
-            child  = Element.pool.take(childId);
+        var parent = Unit.pool.take(parentId),
+            child  = Unit.pool.take(childId);
 
         if (parent === undefined) {
             return undefined;
@@ -956,7 +956,7 @@ window['Compositer'] = (function () {
             return undefined;
         }
 
-        var element = Element.pool.take(elementId);
+        var element = Unit.pool.take(elementId);
 
         if (element === undefined) {
             return undefined;
@@ -988,9 +988,9 @@ window['Compositer'] = (function () {
     };
 
     Compositer.prototype['image_create'] = function (object) {
-        var image = new Element('image', object);
+        var image = new Unit('image', object);
 
-        image.id(Element.pool.put(image));
+        image.id(Unit.pool.put(image));
 
         return image.id();
     };
@@ -1004,15 +1004,15 @@ window['Compositer'] = (function () {
             return undefined;
         }
 
-        Element.pool.free(imageId);
+        Unit.pool.free(imageId);
 
         return undefined;
     };
 
     Compositer.prototype['text_create'] = function (object) {
-        var text = new Element('text', object);
+        var text = new Unit('text', object);
 
-        text.id(Element.pool.put(text));
+        text.id(Unit.pool.put(text));
 
         return text.id();
     };
@@ -1026,7 +1026,7 @@ window['Compositer'] = (function () {
             return undefined;
         }
 
-        Element.pool.free(textId);
+        Unit.pool.free(textId);
 
         return undefined;
     };
@@ -1072,7 +1072,7 @@ window['Compositer'] = (function () {
             return undefined;
         }
 
-        var element   = Element.pool.take(elementId),
+        var element   = Unit.pool.take(elementId),
             animation = Animation.pool.take(animationId);
 
         if (element === undefined || animation === undefined) {
@@ -1161,7 +1161,7 @@ window['Compositer'] = (function () {
         }
 
         if ((/mouse/).test(eventName)) {
-            var element = Element.pool.take(elementId);
+            var element = Unit.pool.take(elementId);
 
             if (element === undefined) {
                 return undefined;
@@ -1202,7 +1202,7 @@ window['Compositer'] = (function () {
             return undefined;
         }
 
-        element = Element.pool.take (elementId);
+        element = Unit.pool.take (elementId);
 
         if (element === undefined) {
             return undefined;
