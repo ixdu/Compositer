@@ -764,27 +764,27 @@ var Compositer = (function () {
 
     /* Event */
 
-    var event = function (event) {
-        if (typeof arguments.callee.callback !== 'function') {
+    var event = function (incident) {
+        if (typeof event.callback !== 'function') {
             return undefined;
         }
 
-        if (!event) {
-            event = window.event;
+        if (!incident) {
+            incident = window.event;
         }
 
-        if (event.type === 'animation_stopped') {
-            arguments.callee.callback(
-                event.currentTarget.id, 'animation_stopped'
+        if (incident.type === 'animation_stopped') {
+            event.callback(
+                incident.currentTarget.id, 'animation_stopped'
             );
         }
 
         var eventGroup =
-            (/mouse/).test(event.type) ? 'mouse' :
-            (/key/).test(event.type)   ? 'key'   :
+            (/mouse/).test(incident.type) ? 'mouse' :
+            (/key/).test(incident.type)   ? 'key'   :
                 null,
 
-        eventName = arguments.callee.correct[event.type];
+        eventName = event.correct[incident.type];
 
         if (eventName === undefined) {
             return undefined;
@@ -804,12 +804,12 @@ var Compositer = (function () {
                         pointer_id : 0,
 
                         x : (element.width.unit  === '%') ?
-                            (100 / element.width.px().value  * event.layerX) :
-                            event.layerX,
+                            (100 / element.width.px().value  * incident.layerX) :
+                            incident.layerX,
 
                         y : (element.height.unit === '%') ?
-                            (100 / element.height.px().value * event.layerY) :
-                            event.layerY
+                            (100 / element.height.px().value * incident.layerY) :
+                            incident.layerY
                     }]
                 };
             break;
@@ -819,27 +819,27 @@ var Compositer = (function () {
                 eventData = {
                     key_obj :
                         {
-                            group_id : 0, keynum : event.keyCode,
+                            group_id : 0, keynum : incident.keyCode,
                             key_modificators : {}
                         }
                 };
 
-                if (event.ctrlKey) {
+                if (incident.ctrlKey) {
                     eventData.key_obj.key_modificators.ctrl  = true;
                 }
 
-                if (event.shiftKey) {
+                if (incident.shiftKey) {
                     eventData.key_obj.key_modificators.shift = true;
                 }
 
-                if (event.metaKey) {
+                if (incident.metaKey) {
                     eventData.key_obj.key_modificators.alt   = true;
                 }
             break;
             default: return undefined;
         }
 
-        arguments.callee.callback(elementId, eventName, eventData);
+        event.callback(elementId, eventName, eventData);
 
         return undefined;
     };
