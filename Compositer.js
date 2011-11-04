@@ -649,7 +649,7 @@ window['Compositer'] = (function () {
         }
 
         this.duration =
-            (act.duration) ? act.duration + ((late) ? late : 0) : 0;
+            (act['duration']) ? act['duration'] + ((late) ? late : 0) : 0;
 
         this.vectors = {};
 
