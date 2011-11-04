@@ -21,6 +21,8 @@
 /* Compositer */
 var Compositer = (function () {
 
+    'use strict';
+
     /* Universal method to take window size in different browsers */
 
     var wsSize = {};
