@@ -250,33 +250,12 @@ var Compositer = (function () {
             return undefined;
         }
 
-        this.fontSize(this);
+        this.fontSize.apply(this);
     };
 
-    Element.prototype.types.text.prototype.fontSize = function (target) {
-        if (arguments.callee.init.already === undefined) {
-            arguments.callee.init();
-        }
+    Element.prototype.types.text.prototype.fontSize = {};
 
-        var string = target.html.innerHTML,
-
-            width  = target.width.px().value,
-            height = target.height.px().value,
-
-            widthWeight = arguments.callee.widthWeight,
-
-            font   = {
-                width  : width / string.length * widthWeight,
-                height : height
-            },
-
-            fontSize = (font.width < font.height) ? font.width : font.height;
-
-        target.html.style.fontSize   = fontSize + 'px';
-        target.html.style.lineHeight = height   + 'px';
-    };
-
-    Element.prototype.types.text.prototype.fontSize.init = function () {
+    Element.prototype.types.text.prototype.fontSize.detect = function () {
         var span = document.createElement('span'), fontSize = 16;
 
         span.innerHTML        = 'X';
@@ -295,7 +274,28 @@ var Compositer = (function () {
 
         document.body.removeChild(span);
 
-        arguments.callee.already = true;
+        return this.widthWeight;
+    };
+
+    Element.prototype.types.text.prototype.fontSize.apply = function (target) {
+        var widthWeight =
+            (this.widthWeight === undefined) ?
+                this.detect() : this.widthWeight,
+
+            string = target.html.innerHTML,
+
+            width  = target.width.px().value,
+            height = target.height.px().value,
+
+            font   = {
+                width  : width / string.length * widthWeight,
+                height : height
+            },
+
+            fontSize = (font.width < font.height) ? font.width : font.height;
+
+        target.html.style.fontSize   = fontSize + 'px';
+        target.html.style.lineHeight = height   + 'px';
     };
 
 
