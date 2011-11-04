@@ -19,7 +19,7 @@
 */
 
 /* Compositer */
-var Compositer = (function () {
+window['Compositer'] = (function () {
 
     'use strict';
 
@@ -590,7 +590,7 @@ var Compositer = (function () {
 
     Animation.pool = new Pool();
 
-    Animation.prototype.init = function(chain) {
+    Animation.prototype.init = function (chain) {
         if (
             chain             === undefined ||
             chain.constructor !== Array     ||
@@ -764,7 +764,7 @@ var Compositer = (function () {
         Animation.worker.last = new Date();
 
         setTimeout(
-            function() {Animation.worker(true);},
+            function () {Animation.worker(true);},
             1000 / Animation.worker.maxFps
         );
 
@@ -895,7 +895,7 @@ var Compositer = (function () {
         }
     };
 
-    Compositer.prototype.frame_create = function (object) {
+    Compositer.prototype['frame_create'] = function (object) {
         var frame = new Element('frame', object);
 
         frame.id(Element.pool.put(frame));
@@ -903,7 +903,7 @@ var Compositer = (function () {
         return frame.id();
     };
 
-    Compositer.prototype.frame_destroy = function (frameId) {
+    Compositer.prototype['frame_destroy'] = function (frameId) {
         if (typeof frameId !== 'number') {
             return undefined;
         }
@@ -917,7 +917,7 @@ var Compositer = (function () {
         return undefined;
     };
 
-    Compositer.prototype.frame_add = function (parentId, childId) {
+    Compositer.prototype['frame_add'] = function (parentId, childId) {
         if (typeof parentId !== 'number' ||
             typeof childId  !== 'number')
         {
@@ -951,7 +951,7 @@ var Compositer = (function () {
         return undefined;
     };
 
-    Compositer.prototype.frame_remove = function (elementId) {
+    Compositer.prototype['frame_remove'] = function (elementId) {
         if (typeof elementId !== 'number') {
             return undefined;
         }
@@ -987,7 +987,7 @@ var Compositer = (function () {
         return undefined;
     };
 
-    Compositer.prototype.image_create = function (object) {
+    Compositer.prototype['image_create'] = function (object) {
         var image = new Element('image', object);
 
         image.id(Element.pool.put(image));
@@ -995,7 +995,7 @@ var Compositer = (function () {
         return image.id();
     };
 
-    Compositer.prototype.image_destroy = function (imageId) {
+    Compositer.prototype['image_destroy'] = function (imageId) {
         if (typeof imageId !== 'number') {
             return undefined;
         }
@@ -1009,7 +1009,7 @@ var Compositer = (function () {
         return undefined;
     };
 
-    Compositer.prototype.text_create = function (object) {
+    Compositer.prototype['text_create'] = function (object) {
         var text = new Element('text', object);
 
         text.id(Element.pool.put(text));
@@ -1017,7 +1017,7 @@ var Compositer = (function () {
         return text.id();
     };
 
-    Compositer.prototype.text_destroy = function (textId) {
+    Compositer.prototype['text_destroy'] = function (textId) {
         if (typeof textId !== 'number') {
             return undefined;
         }
@@ -1031,7 +1031,7 @@ var Compositer = (function () {
         return undefined;
     };
 
-    Compositer.prototype.anim_create = function (chain) {
+    Compositer.prototype['anim_create'] = function (chain) {
         if (typeof chain !== 'object') {
             return undefined;
         }
@@ -1045,7 +1045,7 @@ var Compositer = (function () {
         return Animation.pool.put(animation);
     };
 
-    Compositer.prototype.anim_destroy = function (animId) {
+    Compositer.prototype['anim_destroy'] = function (animId) {
         if (typeof animId !== 'number') {
             return undefined;
         }
@@ -1065,7 +1065,7 @@ var Compositer = (function () {
         return undefined;
     };
 
-    Compositer.prototype.anim_bind = function(elementId, animationId) {
+    Compositer.prototype['anim_bind'] = function (elementId, animationId) {
         if (typeof elementId   !== 'number' ||
             typeof animationId !== 'number')
         {
@@ -1088,7 +1088,7 @@ var Compositer = (function () {
         return bind.id;
     };
 
-    Compositer.prototype.anim_unbind = function (bindId) {
+    Compositer.prototype['anim_unbind'] = function (bindId) {
         if (typeof bindId !== 'number') {
             return undefined;
         }
@@ -1105,7 +1105,7 @@ var Compositer = (function () {
         return undefined;
     };
 
-    Compositer.prototype.anim_start = function (bindId) {
+    Compositer.prototype['anim_start'] = function (bindId) {
         if (typeof bindId !== 'number') {
             return undefined;
         }
@@ -1121,7 +1121,7 @@ var Compositer = (function () {
         return undefined;
     };
 
-    Compositer.prototype.anim_stop = function (bindId) {
+    Compositer.prototype['anim_stop'] = function (bindId) {
         if (typeof bindId !== 'number') {
             return undefined;
         }
@@ -1137,7 +1137,7 @@ var Compositer = (function () {
         return undefined;
     };
 
-    Compositer.prototype.event_register = function (elementId, eventName) {
+    Compositer.prototype['event_register'] = function (elementId, eventName) {
         if (typeof elementId !== 'number' ||
             typeof eventName !== 'string')
         {
@@ -1179,7 +1179,7 @@ var Compositer = (function () {
         return undefined;
     };
 
-    Compositer.prototype.event_unregister = function (elementId, eventName) {
+    Compositer.prototype['event_unregister'] = function (elementId, eventName) {
         if (typeof elementId !== 'number') {
             return undefined;
         }
@@ -1227,7 +1227,7 @@ var Compositer = (function () {
         return undefined;
     };
 
-    Compositer.prototype.events_callback_set = function (callback) {
+    Compositer.prototype['events_callback_set'] = function (callback) {
         event.callback = callback;
 
         return undefined;
