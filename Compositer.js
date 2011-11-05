@@ -132,13 +132,13 @@ window['Compositer'] = (function () {
         var parseResult;
 
         if (typeof id !== 'number') {
-            parseResult = (/^_(\d+)$/).exec(this.html.id);
+            parseResult = (/^_(\d+)$/).exec(this.html['id']);
 
             if (parseResult !== null) {
                 return +parseResult[1];
             }
         } else {
-            this.html.id = '_' + id;
+            this.html['id'] = '_' + id;
 
             return undefined;
         }
@@ -188,7 +188,7 @@ window['Compositer'] = (function () {
 
     /* Frame element */
 
-    Unit.prototype.types.frame = function (object) {
+    Unit.prototype.types['frame'] = function (object) {
         this.childs = [];
 
         this.html = document.createElement('div');
@@ -197,9 +197,9 @@ window['Compositer'] = (function () {
         this.prepare(object);
     };
 
-    Unit.prototype.types.frame.prototype = new Unit(undefined, undefined);
+    Unit.prototype.types['frame'].prototype = new Unit(undefined, undefined);
 
-    Unit.prototype.types.frame.prototype.init = function (object) {
+    Unit.prototype.types['frame'].prototype.init = function (object) {
         if (typeof object.color === 'string') {
             this.html.style.backgroundColor = object.color;
         }
@@ -208,7 +208,7 @@ window['Compositer'] = (function () {
 
     /* Image element */
 
-    Unit.prototype.types.image = function (object) {
+    Unit.prototype.types['image'] = function (object) {
         this.html = document.createElement('img');
 
         this.init(object);
@@ -216,9 +216,9 @@ window['Compositer'] = (function () {
         this.prepare(object);
     };
 
-    Unit.prototype.types.image.prototype = new Unit(undefined, undefined);
+    Unit.prototype.types['image'].prototype = new Unit(undefined, undefined);
 
-    Unit.prototype.types.image.prototype.init = function (object) {
+    Unit.prototype.types['image'].prototype.init = function (object) {
         if (typeof object.source === 'string') {
             this.html.src = object.source;
         }
@@ -229,7 +229,7 @@ window['Compositer'] = (function () {
 
     /* Text element */
 
-    Unit.prototype.types.text = function (object) {
+    Unit.prototype.types['text'] = function (object) {
         this.html = document.createElement('span');
 
         this.html.style.fontFamily = 'monospace';
@@ -241,9 +241,9 @@ window['Compositer'] = (function () {
         this.prepare(object);
     };
 
-    Unit.prototype.types.text.prototype = new Unit(undefined, undefined);
+    Unit.prototype.types['text'].prototype = new Unit(undefined, undefined);
 
-    Unit.prototype.types.text.prototype.init = function (object) {
+    Unit.prototype.types['text'].prototype.init = function (object) {
         if (typeof object.text === 'string') {
             this.html.innerHTML = object.text;
         }
@@ -253,7 +253,7 @@ window['Compositer'] = (function () {
         }
     };
 
-    Unit.prototype.types.text.prototype.resized = function () {
+    Unit.prototype.types['text'].prototype.resized = function () {
         if (typeof this.width !== 'object' || typeof this.height !== 'object') {
             return undefined;
         }
@@ -261,9 +261,9 @@ window['Compositer'] = (function () {
         this.fontSize.apply(this);
     };
 
-    Unit.prototype.types.text.prototype.fontSize = {};
+    Unit.prototype.types['text'].prototype.fontSize = {};
 
-    Unit.prototype.types.text.prototype.fontSize.detect = function () {
+    Unit.prototype.types['text'].prototype.fontSize.detect = function () {
         var span = document.createElement('span'), fontSize = 16;
 
         span.innerHTML        = 'X';
@@ -285,7 +285,7 @@ window['Compositer'] = (function () {
         return this.widthWeight;
     };
 
-    Unit.prototype.types.text.prototype.fontSize.apply = function (target) {
+    Unit.prototype.types['text'].prototype.fontSize.apply = function (target) {
         var widthWeight =
             (this.widthWeight === undefined) ?
                 this.detect() : this.widthWeight,
@@ -509,44 +509,44 @@ window['Compositer'] = (function () {
 
     /* Width type */
 
-    Unit.Value.prototype.types.width = function () {};
-    Unit.Value.prototype.types.width.prototype = new Unit.Value(undefined, undefined);
+    Unit.Value.prototype.types['width'] = function () {};
+    Unit.Value.prototype.types['width'].prototype = new Unit.Value(undefined, undefined);
 
 
     /* Height type */
 
-    Unit.Value.prototype.types.height = function () {};
-    Unit.Value.prototype.types.height.prototype = new Unit.Value(undefined, undefined);
+    Unit.Value.prototype.types['height'] = function () {};
+    Unit.Value.prototype.types['height'].prototype = new Unit.Value(undefined, undefined);
 
 
     /* X type */
 
-    Unit.Value.prototype.types.x = function () {};
-    Unit.Value.prototype.types.x.prototype = new Unit.Value(undefined, undefined);
+    Unit.Value.prototype.types['x'] = function () {};
+    Unit.Value.prototype.types['x'].prototype = new Unit.Value(undefined, undefined);
 
 
     /* Y Type */
 
-    Unit.Value.prototype.types.y = function () {};
-    Unit.Value.prototype.types.y.prototype = new Unit.Value(undefined, undefined);
+    Unit.Value.prototype.types['y'] = function () {};
+    Unit.Value.prototype.types['y'].prototype = new Unit.Value(undefined, undefined);
 
 
     /* Z-index type */
 
-    Unit.Value.prototype.types.z_index = function () {};
-    Unit.Value.prototype.types.z_index.prototype = new Unit.Value(undefined, undefined);
+    Unit.Value.prototype.types['z_index'] = function () {};
+    Unit.Value.prototype.types['z_index'].prototype = new Unit.Value(undefined, undefined);
 
-    Unit.Value.prototype.types.z_index.prototype.apply = function (target) {
+    Unit.Value.prototype.types['z_index'].prototype.apply = function (target) {
         target.html.style.zIndex = Math.round(this.value);
     };
 
 
     /* Opacity type */
 
-    Unit.Value.prototype.types.opacity = function () {};
-    Unit.Value.prototype.types.opacity.prototype = new Unit.Value(undefined, undefined);
+    Unit.Value.prototype.types['opacity'] = function () {};
+    Unit.Value.prototype.types['opacity'].prototype = new Unit.Value(undefined, undefined);
 
-    Unit.Value.prototype.types.opacity.prototype.apply = function (target) {
+    Unit.Value.prototype.types['opacity'].prototype.apply = function (target) {
         if (this.constructor.prototype.work === false) {
             return undefined;
         }
@@ -574,8 +574,8 @@ window['Compositer'] = (function () {
 
     /* Rotate type */
 
-    Unit.Value.prototype.types.rotate = function () {};
-    Unit.Value.prototype.types.rotate.prototype = new Unit.Value(undefined, undefined);
+    Unit.Value.prototype.types['rotate'] = function () {};
+    Unit.Value.prototype.types['rotate'].prototype = new Unit.Value(undefined, undefined);
 
 
     /* Animation */
@@ -678,7 +678,7 @@ window['Compositer'] = (function () {
         Animation.worker.pool.free(this.workerPoolId);
 
         if (this.callback) {
-            event({type : 'animation_stopped', currentTarget : this});
+            window['incident']({type : 'animation_stopped', currentTarget : this});
         }
 
         return true;
@@ -777,27 +777,27 @@ window['Compositer'] = (function () {
 
     /* Event */
 
-    var event = function (incident) {
-        if (typeof event.callback !== 'function') {
+    window['incident'] = function (event) {
+        if (typeof window['incident'].callback !== 'function') {
             return undefined;
         }
 
-        if (!incident) {
-            incident = window.event;
+        if (!event) {
+            incident = window['event'];
         }
 
-        if (incident.type === 'animation_stopped') {
-            event.callback(
-                incident.currentTarget.id, 'animation_stopped'
+        if (event.type === 'animation_stopped') {
+            window['incident'].callback(
+                event['currentTarget']['id'], 'animation_stopped'
             );
         }
 
         var eventGroup =
-            (/mouse/).test(incident.type) ? 'mouse' :
-            (/key/).test(incident.type)   ? 'key'   :
+            (/mouse/).test(event.type) ? 'mouse' :
+            (/key/).test(event.type)   ? 'key'   :
                 null,
 
-        eventName = event.correct[incident.type];
+        eventName = window['incident'].correct[event.type];
 
         if (eventName === undefined) {
             return undefined;
@@ -807,7 +807,7 @@ window['Compositer'] = (function () {
 
         switch (eventGroup) {
             case 'mouse':
-                elementId = +(/^_(\d+)$/).exec(incident.currentTarget.id)[1];
+                elementId = +(/^_(\d+)$/).exec(event['currentTarget']['id'])[1];
 
                 element = Unit.pool.take(elementId);
 
@@ -817,12 +817,12 @@ window['Compositer'] = (function () {
                         pointer_id : 0,
 
                         x : (element.width.unit  === '%') ?
-                            (100 / element.width.px().value  * incident.layerX) :
-                            incident.layerX,
+                            (100 / element.width.px().value  * event.layerX) :
+                            event.layerX,
 
                         y : (element.height.unit === '%') ?
-                            (100 / element.height.px().value * incident.layerY) :
-                            incident.layerY
+                            (100 / element.height.px().value * event.layerY) :
+                            event.layerY
                     }]
                 };
             break;
@@ -832,50 +832,50 @@ window['Compositer'] = (function () {
                 eventData = {
                     key_obj :
                         {
-                            group_id : 0, keynum : incident.keyCode,
+                            group_id : 0, keynum : event.keyCode,
                             key_modificators : {}
                         }
                 };
 
-                if (incident.ctrlKey) {
+                if (event['ctrlKey']) {
                     eventData.key_obj.key_modificators.ctrl  = true;
                 }
 
-                if (incident.shiftKey) {
+                if (event['shiftKey']) {
                     eventData.key_obj.key_modificators.shift = true;
                 }
 
-                if (incident.metaKey) {
+                if (event['metaKey']) {
                     eventData.key_obj.key_modificators.alt   = true;
                 }
             break;
             default: return undefined;
         }
 
-        event.callback(elementId, eventName, eventData);
+        window['incident'].callback(elementId, eventName, eventData);
 
         return undefined;
     };
 
-    event.correct = {
-        pointer_in     : 'onmouseover',
-        pointer_out    : 'onmouseout',
-        pointer_down   : 'onmousedown',
-        pointer_up     : 'onmouseup',
-        pointer_motion : 'onmousemove',
+    window['incident'].correct = {
+        'pointer_in'     : 'onmouseover',
+        'pointer_out'    : 'onmouseout',
+        'pointer_down'   : 'onmousedown',
+        'pointer_up'     : 'onmouseup',
+        'pointer_motion' : 'onmousemove',
 
-        key_down       : 'onkeydown',
-        key_up         : 'onkeyup',
+        'key_down'       : 'onkeydown',
+        'key_up'         : 'onkeyup',
 
 
-        mouseover      : 'pointer_in',
-        mouseout       : 'pointer_out',
-        mousedown      : 'pointer_down',
-        mouseup        : 'pointer_up',
-        mousemove      : 'pointer_motion',
+        'mouseover'      : 'pointer_in',
+        'mouseout'       : 'pointer_out',
+        'mousedown'      : 'pointer_down',
+        'mouseup'        : 'pointer_up',
+        'mousemove'      : 'pointer_motion',
 
-        keydown        : 'key_down',
-        keyup          : 'key_up'
+        'keydown'        : 'key_down',
+        'keyup'          : 'key_up'
     };
 
 
@@ -1154,7 +1154,7 @@ window['Compositer'] = (function () {
             return undefined;
         }
 
-        eventName = event.correct[eventName];
+        eventName = window['incident'].correct[eventName];
 
         if (eventName === undefined) {
             return undefined;
@@ -1167,13 +1167,13 @@ window['Compositer'] = (function () {
                 return undefined;
             }
 
-            element.html[eventName] = event;
+            element.html[eventName] = window['incident'];
 
             return undefined;
         }
 
         if ((/key/).test(eventName)) {
-            document[eventName] = event;
+            document[eventName] = window['incident'];
         }
 
         return undefined;
@@ -1228,7 +1228,7 @@ window['Compositer'] = (function () {
     };
 
     Compositer.prototype['events_callback_set'] = function (callback) {
-        event.callback = callback;
+        window['incident'].callback = callback;
 
         return undefined;
     };
