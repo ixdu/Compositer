@@ -15,16 +15,36 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.'
 
-  version 0.7.3
+  version 0.7.4
 */
 
 /* Compositer */
-(function () {
+window['Compositer'] = (function () {
+
+    'use strict';
 
     /* Universal method to take window size in different browsers */
 
-    var wsSize = function () {
-        switch (arguments.callee.way) {
+    var wsSize = {};
+
+    wsSize.detect = function () {
+        this.way =
+            (window.innerWidth &&
+                window.innerHeight) ? 1 :
+            (document.body &&
+                document.body.clientWidth &&
+                document.body.clientHeight) ? 2 :
+            (document.documentElement &&
+                document.documentElement.clientWidth &&
+                document.documentElement.clientHeight) ? 3 : 4;
+
+        return this.way;
+    };
+
+    wsSize.take = function () {
+        var way = (this.way === undefined) ? this.detect() : this.way;
+
+        switch (way) {
             case 1:
                 return {
                     width : window.innerWidth,
@@ -42,27 +62,16 @@
                     width : document.documentElement.clientWidth,
                     height : document.documentElement.clientHeight
                 };
-            case 4:
+            default:
                 throw new Error(
                     'Can not detect window size in this browser'
                 );
-            default:
-                arguments.callee.way =
-                    (window.innerWidth
-                        && window.innerHeight) ? 1 :
-                    (document.body
-                        && document.body.clientWidth
-                        && document.body.clientHeight) ? 2 :
-                    (document.documentElement
-                        && document.documentElement.clientWidth
-                        && document.documentElement.clientHeight) ? 3 : 4;
-
-                return arguments.callee();
         }
     };
 
-
     /* Pool */
+
+    /** @constructor */
 
     var Pool = function () {
         this.pool = []; this.available = []; this.count = 0;
@@ -97,9 +106,11 @@
     };
 
 
-    /* Element */
+    /* Unit */
 
-    var Element = function (type, object) {
+    /** @constructor */
+
+    var Unit = function (type, object) {
         if (typeof type !== 'string') {
             return undefined;
         }
@@ -115,25 +126,25 @@
         return new this.types[type](object);
     };
 
-    Element.pool = new Pool();
+    Unit.pool = new Pool();
 
-    Element.prototype.id = function (id) {
+    Unit.prototype.id = function (id) {
         var parseResult;
 
         if (typeof id !== 'number') {
-            parseResult = (/^_(\d+)$/).exec(this.html.id);
+            parseResult = (/^_(\d+)$/).exec(this.html['id']);
 
             if (parseResult !== null) {
                 return +parseResult[1];
             }
         } else {
-            this.html.id = '_' + id;
+            this.html['id'] = '_' + id;
 
             return undefined;
         }
     };
 
-    Element.prototype.prepare = function (object) {
+    Unit.prototype.prepare = function (object) {
         this.html.style.position = 'fixed';
         this.html.style.margin   = '0px';
         this.html.style.padding  = '0px';
@@ -141,21 +152,26 @@
         var value, propertyName;
 
         for (propertyName in this.defaults) {
-            if (typeof object[propertyName] === 'string') {
-                value = new Element.Value(object[propertyName], propertyName);
-            } else {
-                value = new Element.Value(this.defaults[propertyName]);
+            if (this.defaults.hasOwnProperty(propertyName)) {
+                if (typeof object[propertyName] === 'string') {
+                    value = new Unit.Value(object[propertyName], propertyName);
+                } else {
+                    value =
+                        new Unit.Value(
+                            this.defaults[propertyName], undefined
+                        );
+                }
+
+                this[propertyName] = value;
+
+                value.apply(this);
             }
-
-            this[propertyName] = value;
-
-            value.apply(this);
         }
 
         return undefined;
     };
 
-    Element.prototype.defaults = {
+    Unit.prototype.defaults = {
         width   : {type : 'width',   value : 100, unit : '%'  },
         height  : {type : 'height',  value : 100, unit : '%'  },
         x       : {type : 'x',       value : 0,   unit : 'px' },
@@ -166,14 +182,14 @@
     };
 
 
-    /* Element types */
+    /* Unit types */
 
-    Element.prototype.types = {};
+    Unit.prototype.types = {};
 
 
     /* Frame element */
 
-    Element.prototype.types.frame = function (object) {
+    Unit.prototype.types['frame'] = function (object) {
         this.childs = [];
 
         this.html = document.createElement('div');
@@ -182,17 +198,18 @@
         this.prepare(object);
     };
 
-    Element.prototype.types.frame.prototype = new Element();
+    Unit.prototype.types['frame'].prototype = new Unit(undefined, undefined);
 
-    Element.prototype.types.frame.prototype.init = function (object) {
+    Unit.prototype.types['frame'].prototype.init = function (object) {
         if (typeof object.color === 'string') {
             this.html.style.backgroundColor = object.color;
         }
-    }
+    };
+
 
     /* Image element */
 
-    Element.prototype.types.image = function (object) {
+    Unit.prototype.types['image'] = function (object) {
         this.html = document.createElement('img');
 
         this.init(object);
@@ -200,9 +217,9 @@
         this.prepare(object);
     };
 
-    Element.prototype.types.image.prototype = new Element();
+    Unit.prototype.types['image'].prototype = new Unit(undefined, undefined);
 
-    Element.prototype.types.image.prototype.init = function (object) {
+    Unit.prototype.types['image'].prototype.init = function (object) {
         if (typeof object.source === 'string') {
             this.html.src = object.source;
         }
@@ -213,7 +230,7 @@
 
     /* Text element */
 
-    Element.prototype.types.text = function (object) {
+    Unit.prototype.types['text'] = function (object) {
         this.html = document.createElement('span');
 
         this.html.style.fontFamily = 'monospace';
@@ -225,9 +242,9 @@
         this.prepare(object);
     };
 
-    Element.prototype.types.text.prototype = new Element();
+    Unit.prototype.types['text'].prototype = new Unit(undefined, undefined);
 
-    Element.prototype.types.text.prototype.init = function (object) {
+    Unit.prototype.types['text'].prototype.init = function (object) {
         if (typeof object.text === 'string') {
             this.html.innerHTML = object.text;
         }
@@ -237,38 +254,17 @@
         }
     };
 
-    Element.prototype.types.text.prototype.resized = function () {
+    Unit.prototype.types['text'].prototype.resized = function () {
         if (typeof this.width !== 'object' || typeof this.height !== 'object') {
             return undefined;
         }
 
-        this.fontSize(this);
+        this.fontSize.apply(this);
     };
 
-    Element.prototype.types.text.prototype.fontSize = function (target) {
-        if (arguments.callee.init.already === undefined) {
-            arguments.callee.init();
-        }
+    Unit.prototype.types['text'].prototype.fontSize = {};
 
-        var string = target.html.innerHTML,
-
-            width  = target.width.px().value,
-            height = target.height.px().value,
-
-            widthWeight = arguments.callee.widthWeight,
-
-            font   = {
-                width  : width / string.length * widthWeight,
-                height : height
-            },
-
-            fontSize = (font.width < font.height) ? font.width : font.height;
-
-        target.html.style.fontSize   = fontSize + 'px';
-        target.html.style.lineHeight = height   + 'px';
-    };
-
-    Element.prototype.types.text.prototype.fontSize.init = function () {
+    Unit.prototype.types['text'].prototype.fontSize.detect = function () {
         var span = document.createElement('span'), fontSize = 16;
 
         span.innerHTML        = 'X';
@@ -287,16 +283,37 @@
 
         document.body.removeChild(span);
 
-        arguments.callee.already = true;
+        return this.widthWeight;
+    };
+
+    Unit.prototype.types['text'].prototype.fontSize.apply = function (target) {
+        var widthWeight =
+            (this.widthWeight === undefined) ?
+                this.detect() : this.widthWeight,
+
+            string = target.html.innerHTML,
+
+            width  = target.width.px().value,
+            height = target.height.px().value,
+
+            font   = {
+                width  : width / string.length * widthWeight,
+                height : height
+            },
+
+            fontSize = (font.width < font.height) ? font.width : font.height;
+
+        target.html.style.fontSize   = fontSize + 'px';
+        target.html.style.lineHeight = height   + 'px';
     };
 
 
     /* Root element */
 
-    Element.root = new Element();
+    Unit.root = new Unit(undefined, undefined);
 
-    Element.root.init = function () {
-        if (typeof document.body !== 'object' || typeof wsSize() !== 'object') {
+    Unit.root.init = function () {
+        if (typeof document.body !== 'object' || typeof wsSize.take() !== 'object') {
             return false;
         }
 
@@ -306,19 +323,25 @@
 
         this.prepare({});
 
-        var root = this, childKey, propertyKey, child;
+        var root = this;
 
         window.onresize = function () {
-            root.width.value  = wsSize().width;
-            root.height.value = wsSize().height;
+            root.width.value  = wsSize.take().width;
+            root.height.value = wsSize.take().height;
 
             root.width.apply(root); root.height.apply(root);
 
-            for (childKey in root.childs) {
-                child = root.childs[childKey];
+            var childKey, propertyKey, child;
 
-                for (propertyKey in child.defaults) {
-                    child[propertyKey].apply(child);
+            for (childKey in root.childs) {
+                if (root.childs.hasOwnProperty(childKey)) {
+                    child = root.childs[childKey];
+
+                    for (propertyKey in child.defaults) {
+                        if (child.defaults.hasOwnProperty(propertyKey)) {
+                            child[propertyKey].apply(child);
+                        }
+                    }
                 }
             }
         };
@@ -326,12 +349,14 @@
         return this;
     };
 
-    Element.root.childs = [];
+    Unit.root.childs = [];
 
 
     /* Value */
 
-    Element.Value = function (value, type) {
+    /** @constructor */
+
+    Unit.Value = function (value, type) {
         var typeName =
             (typeof type === 'string') ? type :
             (typeof value === 'object' &&
@@ -368,8 +393,8 @@
         return type;
     };
 
-    Element.Value.prototype.dissassemble = function (input) {
-        var parseResult = (/([+,-]?\d+\.?\d*)(\D*)/).exec(input);
+    Unit.Value.prototype.dissassemble = function (input) {
+        var parseResult = (/([+,\-]?\d+\.?\d*)(\D*)/).exec(input);
 
         if (parseResult === null) {
             return false;
@@ -391,7 +416,7 @@
         return result;
     };
 
-    Element.Value.prototype.group = function () {
+    Unit.Value.prototype.group = function () {
         var propertyGroup =
             (this.type === 'width' || this.type === 'height') ? 'size'     :
             (this.type === 'x'     || this.type === 'y'     ) ? 'position' :
@@ -400,13 +425,13 @@
         return propertyGroup;
     };
 
-    Element.Value.prototype.apply = function (target) {
+    Unit.Value.prototype.apply = function (target) {
         var group = this.group(),
 
-        unit = (this.unit === null) ? '%' : this.unit,
-        type = (unit === 'px') ? this : this.px(target, true),
+            unit = ((this.unit === null) ? '%' : this.unit),
+            type = ((unit === 'px') ? this : this.px(target, true)),
 
-        assembledValue = Math.round(type.value);
+            assembledValue = Math.round(type.value);
 
         if (group === 'size') {
             assembledValue = Math.abs(assembledValue);
@@ -423,14 +448,16 @@
         var childKey, child;
 
         for (childKey in target.childs) {
-            child = target.childs[childKey];
-            child[this.type].apply(child);
+            if (target.childs.hasOwnProperty(childKey)) {
+                child = target.childs[childKey];
+                child[this.type].apply(child);
+            }
         }
 
         return undefined;
     };
 
-    Element.Value.prototype.px = function (context, recalc) {
+    Unit.Value.prototype.px = function (context, recalc) {
         if (this.unit === 'px') {
             return this;
         }
@@ -448,27 +475,27 @@
         var parent = context.parent,
 
         value =
-            (typeof parent === 'object')
-                ? (group === 'size')
-                    ? parent[this.type].px(parent).value / 100 * this.value
-                    :
+            (typeof parent === 'object') ?
+                (group === 'size') ?
+                    parent[this.type].px(parent).value / 100 * this.value :
                         parent[this.type].px(parent).value +
                         parent[
                             (this.type === 'x') ? 'width' : 'height'
-                        ].px(parent).value / 100 * this.value
-                : (this.type === 'x' || this === 'y') ? 0 :
-                    (this.type === 'width') ? wsSize().width : wsSize().height;
+                        ].px(parent).value / 100 * this.value :
+                    (this.type === 'x' || this.type === 'y') ? 0 :
+                        (this.type === 'width') ?
+                            wsSize.take().width : wsSize.take().height;
 
-        this.cache = new Element.Value({
+        this.cache = new Unit.Value({
             type  : this.type,
             value : value,
             unit  : 'px'
-        });
+        }, undefined);
 
         return this.cache;
     };
 
-    Element.Value.prototype.correct = {
+    Unit.Value.prototype.correct = {
         width  : 'width',
         height : 'height',
         x      : 'left',
@@ -478,50 +505,50 @@
 
     /* Value types */
 
-    Element.Value.prototype.types = {};
+    Unit.Value.prototype.types = {};
 
 
     /* Width type */
 
-    Element.Value.prototype.types.width = function () {};
-    Element.Value.prototype.types.width.prototype = new Element.Value();
+    Unit.Value.prototype.types['width'] = function () {};
+    Unit.Value.prototype.types['width'].prototype = new Unit.Value(undefined, undefined);
 
 
     /* Height type */
 
-    Element.Value.prototype.types.height = function () {};
-    Element.Value.prototype.types.height.prototype = new Element.Value();
+    Unit.Value.prototype.types['height'] = function () {};
+    Unit.Value.prototype.types['height'].prototype = new Unit.Value(undefined, undefined);
 
 
     /* X type */
 
-    Element.Value.prototype.types.x = function () {};
-    Element.Value.prototype.types.x.prototype = new Element.Value();
+    Unit.Value.prototype.types['x'] = function () {};
+    Unit.Value.prototype.types['x'].prototype = new Unit.Value(undefined, undefined);
 
 
     /* Y Type */
 
-    Element.Value.prototype.types.y = function () {};
-    Element.Value.prototype.types.y.prototype = new Element.Value();
+    Unit.Value.prototype.types['y'] = function () {};
+    Unit.Value.prototype.types['y'].prototype = new Unit.Value(undefined, undefined);
 
 
     /* Z-index type */
 
-    Element.Value.prototype.types.z_index = function () {};
-    Element.Value.prototype.types.z_index.prototype = new Element.Value();
+    Unit.Value.prototype.types['z_index'] = function () {};
+    Unit.Value.prototype.types['z_index'].prototype = new Unit.Value(undefined, undefined);
 
-    Element.Value.prototype.types.z_index.prototype.apply = function (target) {
+    Unit.Value.prototype.types['z_index'].prototype.apply = function (target) {
         target.html.style.zIndex = Math.round(this.value);
     };
 
 
     /* Opacity type */
 
-    Element.Value.prototype.types.opacity = function () {};
-    Element.Value.prototype.types.opacity.prototype = new Element.Value();
+    Unit.Value.prototype.types['opacity'] = function () {};
+    Unit.Value.prototype.types['opacity'].prototype = new Unit.Value(undefined, undefined);
 
-    Element.Value.prototype.types.opacity.prototype.apply = function (target) {
-        if (arguments.callee.work === false) {
+    Unit.Value.prototype.types['opacity'].prototype.apply = function (target) {
+        if (this.constructor.prototype.work === false) {
             return undefined;
         }
 
@@ -531,12 +558,12 @@
 
         target.html.style.opacity = opacity;
 
-        if (arguments.callee.work === undefined) {
+        if (this.constructor.prototype.work === undefined) {
 
             if (+target.html.style.opacity === opacity) {
-                arguments.callee.work = true;
+                this.constructor.prototype.work = true;
             } else {
-                arguments.callee.work = false;
+                this.constructor.prototype.work = false;
 
                 return undefined;
             }
@@ -548,8 +575,8 @@
 
     /* Rotate type */
 
-    Element.Value.prototype.types.rotate = function () {};
-    Element.Value.prototype.types.rotate.prototype = new Element.Value();
+    Unit.Value.prototype.types['rotate'] = function () {};
+    Unit.Value.prototype.types['rotate'].prototype = new Unit.Value(undefined, undefined);
 
     Element.Value.prototype.types.rotate.prototype.apply = function (target) {
         if (arguments.callee.prefix === null) {
@@ -592,6 +619,8 @@
 
     /* Animation */
 
+    /** @constructor */
+
     var Animation = function (chain) {
         if (!this.init(chain)) {
             return {};
@@ -600,7 +629,7 @@
 
     Animation.pool = new Pool();
 
-    Animation.prototype.init = function(chain) {
+    Animation.prototype.init = function (chain) {
         if (
             chain             === undefined ||
             chain.constructor !== Array     ||
@@ -618,7 +647,9 @@
 
     /* Animation bind */
 
-    Animation.Bind = function(element, animation) {
+    /** @constructor */
+
+    Animation.Bind = function (element, animation) {
         if (this.init(element, animation) === false) {
             return {};
         }
@@ -639,7 +670,7 @@
         this.animation = animation;
 
         this.act = 0;
-        this.initAct(this.act);
+        this.initAct(this.act, undefined);
 
         return true;
     };
@@ -649,7 +680,7 @@
 
         if (act === undefined) {
             this.act = 0;
-            this.initAct(this.act);
+            this.initAct(this.act, undefined);
 
             this.stop();
 
@@ -657,14 +688,16 @@
         }
 
         this.duration =
-            (act.duration) ? act.duration + ((late) ? late : 0) : 0;
+            (act['duration']) ? act['duration'] + ((late) ? late : 0) : 0;
 
         this.vectors = {};
 
         var actionName;
 
-        for (actionName in act.actions) {
-            this.vectors[actionName] = act.actions[actionName];
+        for (actionName in act['actions']) {
+            if (act['actions'].hasOwnProperty(actionName)) {
+                this.vectors[actionName] = act['actions'][actionName];
+            }
         }
 
         return true;
@@ -673,7 +706,7 @@
     Animation.Bind.prototype.start = function () {
         this.workerPoolId = Animation.worker.pool.put(this);
 
-        Animation.worker();
+        Animation.worker(undefined);
     };
 
     Animation.Bind.prototype.stop = function () {
@@ -684,7 +717,7 @@
         Animation.worker.pool.free(this.workerPoolId);
 
         if (this.callback) {
-            event({type : 'animation_stopped', currentTarget : this});
+            window['incident']({type : 'animation_stopped', currentTarget : this});
         }
 
         return true;
@@ -700,17 +733,19 @@
         var vectorId, vectorOffset, step;
 
         for (vectorId in this.vectors) {
-            vectorOffset = this.vectors[vectorId];
+            if (this.vectors.hasOwnProperty(vectorId)) {
+                vectorOffset = this.vectors[vectorId];
 
-            step =
-                (last)
-                    ? vectorOffset
-                    : (vectorOffset / (this.duration / delay));
+                step =
+                    (last) ?
+                        vectorOffset :
+                        (vectorOffset / (this.duration / delay));
 
-            this.element[vectorId].value += step;
-            this.element[vectorId].apply(this.element);
+                this.element[vectorId].value += step;
+                this.element[vectorId].apply(this.element);
 
-            this.vectors[vectorId] -= step;
+                this.vectors[vectorId] -= step;
+            }
         }
 
         this.duration = this.duration - delay;
@@ -727,29 +762,31 @@
 
     Animation.worker = function (work) {
         if (!work) {
-            if (arguments.callee.already) {
+            if (Animation.worker.already) {
                 return undefined;
             }
         }
 
-        arguments.callee.already = true;
+        Animation.worker.already = true;
 
         var delay =
-            (arguments.callee.last)
-                ? (new Date()).getTime() - arguments.callee.last.getTime()
-                : 1000 / arguments.callee.maxFps,
+            (Animation.worker.last) ?
+                (new Date()).getTime() - Animation.worker.last.getTime() :
+                1000 / Animation.worker.maxFps,
 
 
-        pool = arguments.callee.pool,
+        pool = Animation.worker.pool,
 
         poolId, more;
 
         if (pool.count > 0) {
             for (poolId in pool.pool) {
-                var bind = pool.pool[poolId];
+                if (pool.pool.hasOwnProperty(poolId)) {
+                    var bind = pool.pool[poolId];
 
-                if (bind) {
-                    bind.blink(delay);
+                    if (bind) {
+                        bind.blink(delay);
+                    }
                 }
             }
 
@@ -757,17 +794,17 @@
         }
 
         if (more !== true) {
-            arguments.callee.already = false;
-            delete arguments.callee.last;
+            Animation.worker.already = false;
+            delete Animation.worker.last;
 
             return undefined;
         }
 
-        arguments.callee.last = new Date();
+        Animation.worker.last = new Date();
 
         setTimeout(
-            function() {Animation.worker(true);},
-            1000 / arguments.callee.maxFps
+            function () {Animation.worker(true);},
+            1000 / Animation.worker.maxFps
         );
 
         return undefined;
@@ -779,18 +816,18 @@
 
     /* Event */
 
-    var event = function event (event) {
-        if (typeof arguments.callee.callback !== 'function') {
+    window['incident'] = function (event) {
+        if (typeof window['incident'].callback !== 'function') {
             return undefined;
         }
 
         if (!event) {
-            event = window.event;
+            incident = window['event'];
         }
 
         if (event.type === 'animation_stopped') {
-            arguments.callee.callback(
-                event.currentTarget.id, 'animation_stopped'
+            window['incident'].callback(
+                event['currentTarget']['id'], 'animation_stopped'
             );
         }
 
@@ -799,7 +836,7 @@
             (/key/).test(event.type)   ? 'key'   :
                 null,
 
-        eventName = arguments.callee.correct[event.type];
+        eventName = window['incident'].correct[event.type];
 
         if (eventName === undefined) {
             return undefined;
@@ -809,22 +846,22 @@
 
         switch (eventGroup) {
             case 'mouse':
-                elementId = +(/^_(\d+)$/).exec(event.currentTarget.id)[1];
+                elementId = +(/^_(\d+)$/).exec(event['currentTarget']['id'])[1];
 
-                element = Element.pool.take(elementId);
+                element = Unit.pool.take(elementId);
 
                 eventData = {
-                    group_id    : 0,
-                    pointer_obj : [{
-                        pointer_id : 0,
+                    'group_id'    : 0,
+                    'pointer_obj' : [{
+                        'pointer_id' : 0,
 
-                        x : (element.width.unit  === '%')
-                            ? (100 / element.width.px().value  * event.layerX)
-                            : event.layerX,
+                        'x' : (element.width.unit  === '%') ?
+                            (100 / element.width.px().value  * event.layerX) :
+                            event.layerX,
 
-                        y : (element.height.unit === '%')
-                            ? (100 / element.height.px().value * event.layerY)
-                            : event.layerY
+                        'y' : (element.height.unit === '%') ?
+                            (100 / element.height.px().value * event.layerY) :
+                            event.layerY
                     }]
                 };
             break;
@@ -832,62 +869,62 @@
                 elementId = 0;
 
                 eventData = {
-                    key_obj :
+                    'key_obj' :
                         {
-                            group_id : 0, keynum : event.keyCode,
-                            key_modificators : {}
+                            'group_id' : 0, 'keynum' : event.keyCode,
+                            'key_modificators' : {}
                         }
                 };
 
-                if (event.ctrlKey) {
-                    eventData.key_obj.key_modificators.ctrl  = true;
+                if (event['ctrlKey']) {
+                    eventData['key_obj']['key_modificators']['ctrl']  = true;
                 }
 
-                if (event.shiftKey) {
-                    eventData.key_obj.key_modificators.shift = true;
+                if (event['shiftKey']) {
+                    eventData['key_obj']['key_modificators']['shift'] = true;
                 }
 
-                if (event.metaKey) {
-                    eventData.key_obj.key_modificators.alt   = true;
+                if (event['metaKey']) {
+                    eventData['key_obj']['key_modificators']['alt']   = true;
                 }
             break;
             default: return undefined;
         }
 
-        arguments.callee.callback(elementId, eventName, eventData);
+        window['incident'].callback(elementId, eventName, eventData);
 
         return undefined;
     };
 
-    event.correct = {
-        pointer_in     : 'onmouseover',
-        pointer_out    : 'onmouseout',
-        pointer_down   : 'onmousedown',
-        pointer_up     : 'onmouseup',
-        pointer_motion : 'onmousemove',
+    window['incident'].correct = {
+        'pointer_in'     : 'onmouseover',
+        'pointer_out'    : 'onmouseout',
+        'pointer_down'   : 'onmousedown',
+        'pointer_up'     : 'onmouseup',
+        'pointer_motion' : 'onmousemove',
 
-        key_down       : 'onkeydown',
-        key_up         : 'onkeyup',
+        'key_down'       : 'onkeydown',
+        'key_up'         : 'onkeyup',
 
 
-        mouseover      : 'pointer_in',
-        mouseout       : 'pointer_out',
-        mousedown      : 'pointer_down',
-        mouseup        : 'pointer_up',
-        mousemove      : 'pointer_motion',
+        'mouseover'      : 'pointer_in',
+        'mouseout'       : 'pointer_out',
+        'mousedown'      : 'pointer_down',
+        'mouseup'        : 'pointer_up',
+        'mousemove'      : 'pointer_motion',
 
-        keydown        : 'key_down',
-        keyup          : 'key_up'
+        'keydown'        : 'key_down',
+        'keyup'          : 'key_up'
     };
 
 
     /* Compositer */
 
-    Compositer = function () {
-        var root = Element.root.init();
+    var Compositer = function () {
+        var root = Unit.root.init();
 
         if (typeof root === 'object') {
-            root.id(Element.pool.put(root));
+            root.id(Unit.pool.put(root));
 
             return undefined;
         } else {
@@ -897,15 +934,15 @@
         }
     };
 
-    Compositer.prototype.frame_create = function (object) {
-        var frame = new Element('frame', object);
+    Compositer.prototype['frame_create'] = function (object) {
+        var frame = new Unit('frame', object);
 
-        frame.id(Element.pool.put(frame));
+        frame.id(Unit.pool.put(frame));
 
-        return frame.id();
+        return frame.id(undefined);
     };
 
-    Compositer.prototype.frame_destroy = function (frameId) {
+    Compositer.prototype['frame_destroy'] = function (frameId) {
         if (typeof frameId !== 'number') {
             return undefined;
         }
@@ -914,20 +951,20 @@
             return undefined;
         }
 
-        Element.pool.free(frameId);
+        Unit.pool.free(frameId);
 
         return undefined;
     };
 
-    Compositer.prototype.frame_add = function (parentId, childId) {
+    Compositer.prototype['frame_add'] = function (parentId, childId) {
         if (typeof parentId !== 'number' ||
             typeof childId  !== 'number')
         {
             return undefined;
         }
 
-        var parent = Element.pool.take(parentId),
-            child  = Element.pool.take(childId);
+        var parent = Unit.pool.take(parentId),
+            child  = Unit.pool.take(childId);
 
         if (parent === undefined) {
             return undefined;
@@ -945,18 +982,20 @@
         var propertyKey;
 
         for (propertyKey in child.defaults) {
-            child[propertyKey].apply(child);
+            if (child.defaults.hasOwnProperty(propertyKey)) {
+                child[propertyKey].apply(child);
+            }
         }
 
         return undefined;
     };
 
-    Compositer.prototype.frame_remove = function (elementId) {
+    Compositer.prototype['frame_remove'] = function (elementId) {
         if (typeof elementId !== 'number') {
             return undefined;
         }
 
-        var element = Element.pool.take(elementId);
+        var element = Unit.pool.take(elementId);
 
         if (element === undefined) {
             return undefined;
@@ -971,12 +1010,14 @@
         var childKey, child;
 
         for (childKey in parent) {
-            child = parent[childKey];
+            if (parent.hasOwnProperty(childKey)) {
+                child = parent[childKey];
 
-            if (child === element) {
-                delete parent[childKey];
+                if (child === element) {
+                    delete parent[childKey];
 
-                break;
+                    break;
+                }
             }
         }
 
@@ -985,15 +1026,15 @@
         return undefined;
     };
 
-    Compositer.prototype.image_create = function (object) {
-        var image = new Element('image', object);
+    Compositer.prototype['image_create'] = function (object) {
+        var image = new Unit('image', object);
 
-        image.id(Element.pool.put(image));
+        image.id(Unit.pool.put(image));
 
-        return image.id();
+        return image.id(undefined);
     };
 
-    Compositer.prototype.image_destroy = function (imageId) {
+    Compositer.prototype['image_destroy'] = function (imageId) {
         if (typeof imageId !== 'number') {
             return undefined;
         }
@@ -1002,20 +1043,20 @@
             return undefined;
         }
 
-        Element.pool.free(imageId);
+        Unit.pool.free(imageId);
 
         return undefined;
     };
 
-    Compositer.prototype.text_create = function (object) {
-        var text = new Element('text', object);
+    Compositer.prototype['text_create'] = function (object) {
+        var text = new Unit('text', object);
 
-        text.id(Element.pool.put(text));
+        text.id(Unit.pool.put(text));
 
-        return text.id();
+        return text.id(undefined);
     };
 
-    Compositer.prototype.text_destroy = function (textId) {
+    Compositer.prototype['text_destroy'] = function (textId) {
         if (typeof textId !== 'number') {
             return undefined;
         }
@@ -1024,12 +1065,12 @@
             return undefined;
         }
 
-        Element.pool.free(textId);
+        Unit.pool.free(textId);
 
         return undefined;
     };
 
-    Compositer.prototype.anim_create = function (chain) {
+    Compositer.prototype['anim_create'] = function (chain) {
         if (typeof chain !== 'object') {
             return undefined;
         }
@@ -1043,7 +1084,7 @@
         return Animation.pool.put(animation);
     };
 
-    Compositer.prototype.anim_destroy = function (animId) {
+    Compositer.prototype['anim_destroy'] = function (animId) {
         if (typeof animId !== 'number') {
             return undefined;
         }
@@ -1063,14 +1104,14 @@
         return undefined;
     };
 
-    Compositer.prototype.anim_bind = function(elementId, animationId) {
+    Compositer.prototype['anim_bind'] = function (elementId, animationId) {
         if (typeof elementId   !== 'number' ||
             typeof animationId !== 'number')
         {
             return undefined;
         }
 
-        var element   = Element.pool.take(elementId),
+        var element   = Unit.pool.take(elementId),
             animation = Animation.pool.take(animationId);
 
         if (element === undefined || animation === undefined) {
@@ -1086,7 +1127,7 @@
         return bind.id;
     };
 
-    Compositer.prototype.anim_unbind = function (bindId) {
+    Compositer.prototype['anim_unbind'] = function (bindId) {
         if (typeof bindId !== 'number') {
             return undefined;
         }
@@ -1103,7 +1144,7 @@
         return undefined;
     };
 
-    Compositer.prototype.anim_start = function (bindId) {
+    Compositer.prototype['anim_start'] = function (bindId) {
         if (typeof bindId !== 'number') {
             return undefined;
         }
@@ -1119,7 +1160,7 @@
         return undefined;
     };
 
-    Compositer.prototype.anim_stop = function (bindId) {
+    Compositer.prototype['anim_stop'] = function (bindId) {
         if (typeof bindId !== 'number') {
             return undefined;
         }
@@ -1135,7 +1176,7 @@
         return undefined;
     };
 
-    Compositer.prototype.event_register = function (elementId, eventName) {
+    Compositer.prototype['event_register'] = function (elementId, eventName) {
         if (typeof elementId !== 'number' ||
             typeof eventName !== 'string')
         {
@@ -1152,32 +1193,32 @@
             return undefined;
         }
 
-        eventName = event.correct[eventName];
+        eventName = window['incident'].correct[eventName];
 
         if (eventName === undefined) {
             return undefined;
         }
 
         if ((/mouse/).test(eventName)) {
-            var element = Element.pool.take(elementId);
+            var element = Unit.pool.take(elementId);
 
             if (element === undefined) {
                 return undefined;
             }
 
-            element.html[eventName] = event;
+            element.html[eventName] = window['incident'];
 
             return undefined;
         }
 
         if ((/key/).test(eventName)) {
-            document[eventName] = event;
+            document[eventName] = window['incident'];
         }
 
         return undefined;
     };
 
-    Compositer.prototype.event_unregister = function (elementId, eventName) {
+    Compositer.prototype['event_unregister'] = function (elementId, eventName) {
         if (typeof elementId !== 'number') {
             return undefined;
         }
@@ -1200,7 +1241,7 @@
             return undefined;
         }
 
-        element = Element.pool.take (elementId);
+        element = Unit.pool.take (elementId);
 
         if (element === undefined) {
             return undefined;
@@ -1225,9 +1266,11 @@
         return undefined;
     };
 
-    Compositer.prototype.events_callback_set = function (callback) {
-        event.callback = callback;
+    Compositer.prototype['events_callback_set'] = function (callback) {
+        window['incident'].callback = callback;
 
         return undefined;
     };
+
+    return Compositer;
 }());
