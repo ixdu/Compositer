@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.'
 
-  version 0.7.3
+  version 0.7.4
 */
 
 /* Compositer */
@@ -812,15 +812,15 @@ window['Compositer'] = (function () {
                 element = Unit.pool.take(elementId);
 
                 eventData = {
-                    group_id    : 0,
-                    pointer_obj : [{
-                        pointer_id : 0,
+                    'group_id'    : 0,
+                    'pointer_obj' : [{
+                        'pointer_id' : 0,
 
-                        x : (element.width.unit  === '%') ?
+                        'x' : (element.width.unit  === '%') ?
                             (100 / element.width.px().value  * event.layerX) :
                             event.layerX,
 
-                        y : (element.height.unit === '%') ?
+                        'y' : (element.height.unit === '%') ?
                             (100 / element.height.px().value * event.layerY) :
                             event.layerY
                     }]
@@ -830,23 +830,23 @@ window['Compositer'] = (function () {
                 elementId = 0;
 
                 eventData = {
-                    key_obj :
+                    'key_obj' :
                         {
-                            group_id : 0, keynum : event.keyCode,
-                            key_modificators : {}
+                            'group_id' : 0, 'keynum' : event.keyCode,
+                            'key_modificators' : {}
                         }
                 };
 
                 if (event['ctrlKey']) {
-                    eventData.key_obj.key_modificators.ctrl  = true;
+                    eventData['key_obj']['key_modificators']['ctrl']  = true;
                 }
 
                 if (event['shiftKey']) {
-                    eventData.key_obj.key_modificators.shift = true;
+                    eventData['key_obj']['key_modificators']['shift'] = true;
                 }
 
                 if (event['metaKey']) {
-                    eventData.key_obj.key_modificators.alt   = true;
+                    eventData['key_obj']['key_modificators']['alt']   = true;
                 }
             break;
             default: return undefined;
