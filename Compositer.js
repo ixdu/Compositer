@@ -186,7 +186,7 @@ window['Compositer'] = (function () {
     Unit.prototype.types = {};
 
 
-    /* Frame element */
+    /* Frame unit */
 
     Unit.prototype.types['frame'] = function (object) {
         this.childs = [];
@@ -206,7 +206,7 @@ window['Compositer'] = (function () {
     };
 
 
-    /* Image element */
+    /* Image unit */
 
     Unit.prototype.types['image'] = function (object) {
         this.html = document.createElement('img');
@@ -227,7 +227,7 @@ window['Compositer'] = (function () {
     };
 
 
-    /* Text element */
+    /* Text unit */
 
     Unit.prototype.types['text'] = function (object) {
         this.html = document.createElement('span');
@@ -307,7 +307,7 @@ window['Compositer'] = (function () {
     };
 
 
-    /* Root element */
+    /* Root unit */
 
     Unit.root = new Unit(undefined, undefined);
 
