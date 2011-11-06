@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.'
 
-  version 0.7.4
+  version 0.7.5
 */
 
 /* Compositer */
@@ -512,11 +512,15 @@ window['Compositer'] = (function () {
     Unit.Value.prototype.types['width'] = function () {};
     Unit.Value.prototype.types['width'].prototype = new Unit.Value(undefined, undefined);
 
+    Unit.Value.prototype.types['width'].prototype.work = true;
+
 
     /* Height type */
 
     Unit.Value.prototype.types['height'] = function () {};
     Unit.Value.prototype.types['height'].prototype = new Unit.Value(undefined, undefined);
+
+    Unit.Value.prototype.types['height'].prototype.work = true;
 
 
     /* X type */
@@ -524,17 +528,23 @@ window['Compositer'] = (function () {
     Unit.Value.prototype.types['x'] = function () {};
     Unit.Value.prototype.types['x'].prototype = new Unit.Value(undefined, undefined);
 
+    Unit.Value.prototype.types['x'].prototype.work = true;
+
 
     /* Y Type */
 
     Unit.Value.prototype.types['y'] = function () {};
     Unit.Value.prototype.types['y'].prototype = new Unit.Value(undefined, undefined);
 
+    Unit.Value.prototype.types['y'].prototype.work = true;
+
 
     /* Z-index type */
 
     Unit.Value.prototype.types['z_index'] = function () {};
     Unit.Value.prototype.types['z_index'].prototype = new Unit.Value(undefined, undefined);
+
+    Unit.Value.prototype.types['z_index'].prototype.work = true;
 
     Unit.Value.prototype.types['z_index'].prototype.apply = function (target) {
         target.html.style.zIndex = Math.round(this.value);
@@ -570,12 +580,6 @@ window['Compositer'] = (function () {
 
         return undefined;
     };
-
-
-    /* Rotate type */
-
-    Unit.Value.prototype.types['rotate'] = function () {};
-    Unit.Value.prototype.types['rotate'].prototype = new Unit.Value(undefined, undefined);
 
 
     /* Animation */
@@ -986,6 +990,30 @@ window['Compositer'] = (function () {
 
         return undefined;
     };
+
+    Compositer.prototype['frame_info'] = function () {
+        var unitTypeName, valueTypeName, info = {}, work,
+            unitTypes  = Unit.prototype.types,
+            valueTypes = Unit.Value.types;
+
+        for (unitTypeName in unitTypes) {
+            if (unitTypes.hasOwnProperty(unitTypeName)) {
+                info[unitTypeName] = {};
+
+                for (valueTypeName in valueTypes) {
+                    if (valueTypes.hasOwnProperty(valueTypeName)) {
+                        work = valueTypes[valueTypeName].prototype.work;
+
+                        if (work === true) {
+                            info[unitTypeName][valueTypeName] = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return info;
+    }
 
     Compositer.prototype['image_create'] = function (object) {
         var image = new Unit('image', object);
