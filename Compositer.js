@@ -972,18 +972,18 @@ window['Compositer'] = (function () {
             return undefined;
         }
 
-        var childKey, child;
+        var child, childs = parent.childs;
 
-        for (childKey in parent) {
-            if (parent.hasOwnProperty(childKey)) {
-                child = parent[childKey];
+	var childs_counter = childs.length - 1;
+        while (childs_counter >= 0) {
+            child = childs[childs_counter];
 
-                if (child === element) {
-                    delete parent[childKey];
-
-                    break;
-                }
+            if (child === element) {
+		parent.html.removeChild(child.html);
+		childs.splice(childs_counter, 1);
+                break;
             }
+	    childs_counter--;
         }
 
         delete element.parent;
