@@ -859,8 +859,13 @@ var comp = (function () {
 
         window['incident'].callback(elementId, eventName, eventData);
 
+	if(window['incident'].callbacks.hasOwnProperty(elementId))
+	    window['incident'].callbacks[elementId](eventName, eventData);
+
         return undefined;
     };
+		
+    window['incident'].callbacks = [];
 
     window['incident'].correct = {
         'pointer_in'     : 'onmouseover',
@@ -1166,12 +1171,15 @@ var comp = (function () {
         return undefined;
     };
 
-    Compositer.prototype['event_register'] = function (elementId, eventName) {
+    Compositer.prototype['event_register'] = function (elementId, eventName, callback) {
         if (typeof elementId !== 'number' ||
             typeof eventName !== 'string')
         {
             return undefined;
         }
+
+	if(typeof(callback) != 'undefined')
+	   window['incident'].callbacks[elementId] = callback;
 
         if (eventName === 'animation_stopped') {
             var bind = Animation.Bind.pool.take(elementId);
@@ -1216,8 +1224,11 @@ var comp = (function () {
         if (typeof eventName !== 'string') {
             return undefined;
         }
+ 
+	if(typeof(callback) != 'undefined')
+	   delete window['incident'].callbacks[elementId];
 
-        var element;
+	var element;
 
         if (eventName === 'animation_stopped') {
             element = Animation.Bind.pool.take(elementId);
