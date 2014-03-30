@@ -19,7 +19,8 @@
 */
 
 /* Compositer */
-window['Compositer'] = (function () {
+
+var comp = (function () {
 
     'use strict';
 
@@ -1263,3 +1264,9 @@ window['Compositer'] = (function () {
 
     return Compositer;
 }());
+
+if(typeof(require) != 'undefined')
+    exports.create = function(){ return new comp(); }
+else
+    window['Compositer'] = comp;
+
