@@ -129,6 +129,7 @@ var comp = (function () {
 
     Unit.pool = new Pool();
 
+    //set id of element if passed or get if it is not
     Unit.prototype.id = function (id) {
         var parseResult;
 
@@ -307,6 +308,36 @@ var comp = (function () {
         target.html.style.lineHeight = height   + 'px';
     };
 
+    /*Entry unit*/
+
+    Unit.prototype.types['entry'] = function (object) {
+        this.html = document.createElement('input');
+	this.html.type = 'text';
+	var unit = this;
+	this.control = {
+	    on_text_change : function(callback){
+		unit.html.onchange = function(){
+		    callback(unit.html.value);
+		}
+	    }
+	}
+
+        this.init(object);
+
+        this.prepare(object);
+    };
+
+    Unit.prototype.types['entry'].prototype = new Unit(undefined, undefined);
+
+    Unit.prototype.types['entry'].prototype.init = function (object) {
+        if (typeof object.placeholder === 'string') {
+            this.html.placeholder = object.placeholder;
+        }
+
+        if (typeof object.size === 'string') {
+            this.html.size = object.size;
+        }
+    };
 
     /* Root unit */
 
@@ -792,6 +823,8 @@ var comp = (function () {
         }
 
         if (event.type === 'animation_stopped') {
+	    if(window['incident'].callbacks.hasOwnProperty(event['currentTarget']['elementId']))
+		window['incident'].callbacks[event['currentTarget']['elementId']]('animation_stopped');
             window['incident'].callback(
                 event['currentTarget']['id'], 'animation_stopped'
             );
@@ -1065,6 +1098,32 @@ var comp = (function () {
         return undefined;
     };
 
+    Compositer.prototype['entry_create'] = function (object) {
+        var entry = new Unit('entry', object);
+
+        entry.id(Unit.pool.put(entry));
+
+        return entry.id(undefined);
+    };
+
+    Compositer.prototype['entry_get_control'] = function(entryId){
+	return Unit.pool.take(entryId).control;
+    }
+
+    Compositer.prototype['entry_destroy'] = function (entryId) {
+        if (typeof entryId !== 'number') {
+            return undefined;
+        }
+
+        if (entryId === 0) {
+            return undefined;
+        }
+
+        Unit.pool.free(entryId);
+
+        return undefined;
+    };
+
     Compositer.prototype['anim_create'] = function (chain) {
         if (typeof chain !== 'object') {
             return undefined;
@@ -1114,6 +1173,7 @@ var comp = (function () {
         }
 
         var bind = new Animation.Bind(element, animation);
+	bind.elementId = elementId;
 
         animation.binds.put(bind);
 
@@ -1183,7 +1243,6 @@ var comp = (function () {
 
         if (eventName === 'animation_stopped') {
             var bind = Animation.Bind.pool.take(elementId);
-
             if (bind !== undefined) {
                 bind.callback = true;
             }
