@@ -205,6 +205,7 @@ var comp = (function () {
         if (typeof object.color === 'string') {
             this.html.style.backgroundColor = object.color;
         }
+	this.html.ondragstart = function(){ return false; };
     };
 
 
@@ -226,6 +227,7 @@ var comp = (function () {
         }
 
         this.html.alt = '';
+	this.html.ondragstart = function(){ return false; };
     };
 
 
@@ -460,9 +462,10 @@ var comp = (function () {
         var group = this.group(),
 
             unit = ((this.unit === null) ? '%' : this.unit),
-            type = ((unit === 'px') ? this : this.px(target, true)),
+            type = this.px(target, true),
 
             assembledValue = Math.round(type.value);
+
 
         if (group === 'size') {
             assembledValue = Math.abs(assembledValue);
@@ -489,10 +492,6 @@ var comp = (function () {
     };
 
     Unit.Value.prototype.px = function (context, recalc) {
-        if (this.unit === 'px') {
-            return this;
-        }
-
         if (recalc !== true && typeof this.cache === 'object') {
             return this.cache;
         }
@@ -503,19 +502,34 @@ var comp = (function () {
             return undefined;
         }
 
-        var parent = context.parent,
+        var parent = context.parent;
 
-        value =
-            (typeof parent === 'object') ?
-                (group === 'size') ?
-                    parent[this.type].px(parent).value / 100 * this.value :
+	var value;
+
+	if(this.unit === 'px'){
+	    value = (typeof parent === 'object') ?
+	        group == 'size' ? 
+	            this.value :
+	            parent[this.type].px(parent).value + this.value 
+	    :
+	        this.value;
+	    
+	} else {
+            value =
+                (typeof parent === 'object') ?
+                    (group === 'size') ?
+                        parent[this.type].px(parent).value / 100 * this.value 
+		    :
                         parent[this.type].px(parent).value +
                         parent[
                             (this.type === 'x') ? 'width' : 'height'
-                        ].px(parent).value / 100 * this.value :
+                        ].px(parent).value / 100 * this.value 
+                :
                     (this.type === 'x' || this.type === 'y') ? 0 :
                         (this.type === 'width') ?
-                            wsSize.take().width : wsSize.take().height;
+                            wsSize.take().width : wsSize.take().height;	    
+	}
+
 
         this.cache = new Unit.Value({
             type  : this.type,
@@ -849,18 +863,19 @@ var comp = (function () {
 
                 element = Unit.pool.take(elementId);
 
+//	        console.log('pointer x is', JSON.stringify(event.clientX));
                 eventData = {
                     'group_id'    : 0,
                     'pointer_obj' : [{
                         'pointer_id' : 0,
 
                         'x' : (element.width.unit  === '%') ?
-                            (100 / element.width.px().value  * event.layerX) :
-                            event.layerX,
+                            (100 / element.width.px().value  * event.clientX) :
+                            event.clientX,
 
                         'y' : (element.height.unit === '%') ?
-                            (100 / element.height.px().value * event.layerY) :
-                            event.layerY
+                            (100 / element.height.px().value * event.clientY) :
+                            event.clientY
                     }]
                 };
             break;
