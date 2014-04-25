@@ -341,6 +341,33 @@ var comp = (function () {
         }
     };
 
+    /*Button unit*/
+
+    Unit.prototype.types['button'] = function (object) {
+        this.html = document.createElement('input');
+	this.html.type = 'button';
+	var unit = this;
+	this.control = {
+	    on_pressed : function(callback){
+		unit.html.onclick = function(){
+		    callback();
+		};
+	    }
+	}
+
+        this.init(object);
+
+        this.prepare(object);
+    };
+
+    Unit.prototype.types['button'].prototype = new Unit(undefined, undefined);
+
+    Unit.prototype.types['button'].prototype.init = function (object) {
+        if (typeof object.label === 'string') {
+            this.html.value = object.label;
+        }
+    };
+
     /* Root unit */
 
     Unit.root = new Unit(undefined, undefined);
@@ -1123,7 +1150,7 @@ var comp = (function () {
 
     Compositer.prototype['entry_get_control'] = function(entryId){
 	return Unit.pool.take(entryId).control;
-    }
+    };
 
     Compositer.prototype['entry_destroy'] = function (entryId) {
         if (typeof entryId !== 'number') {
@@ -1135,6 +1162,32 @@ var comp = (function () {
         }
 
         Unit.pool.free(entryId);
+
+        return undefined;
+    };
+
+    Compositer.prototype['button_create'] = function (object) {
+        var button = new Unit('button', object);
+
+        button.id(Unit.pool.put(button));
+
+        return button.id(undefined);
+    };
+
+    Compositer.prototype['button_get_control'] = function(buttonId){
+	return Unit.pool.take(buttonId).control;
+    };
+
+    Compositer.prototype['button_destroy'] = function (buttonId) {
+        if (typeof buttonId !== 'number') {
+            return undefined;
+        }
+
+        if (buttonId === 0) {
+            return undefined;
+        }
+
+        Unit.pool.free(buttonId);
 
         return undefined;
     };
