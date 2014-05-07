@@ -980,6 +980,21 @@ var comp = (function () {
         }
     };
 
+    Compositer.prototype['elem_get_geometry'] = function(elemId, px){
+        if (typeof elemId !== 'number') {
+            return undefined;
+        }
+
+        var elem = Unit.pool.take(elemId);
+
+        return {
+	    x : px ? elem.x.px().value : elem.x.value,
+	    y : px ? elem.y.px().value : elem.y.value,
+	    width : px ?  elem.width.px().value : elem.width.value,
+	    height : px ? elem.width.px().value : elem.height.value
+	};	
+    };
+
     Compositer.prototype['frame_create'] = function (object) {
         var frame = new Unit('frame', object);
 
@@ -1073,27 +1088,30 @@ var comp = (function () {
     };
 
     Compositer.prototype['frame_info'] = function () {
-        var unitTypeName, valueTypeName, info = {}, work,
+        var unitTypeName, valueTypeName, elems = {}, work,
             unitTypes  = Unit.prototype.types,
             valueTypes = Unit.Value.types;
 
         for (unitTypeName in unitTypes) {
             if (unitTypes.hasOwnProperty(unitTypeName)) {
-                info[unitTypeName] = {};
+                elems[unitTypeName] = {};
 
                 for (valueTypeName in valueTypes) {
                     if (valueTypes.hasOwnProperty(valueTypeName)) {
                         work = valueTypes[valueTypeName].prototype.work;
 
                         if (work === true) {
-                            info[unitTypeName][valueTypeName] = true;
+                            elems[unitTypeName][valueTypeName] = true;
                         }
                     }
                 }
             }
         }
 
-        return info;
+        return {
+	    perfomance : 'normal',
+	    elements : elems
+	};
     }
 
     Compositer.prototype['image_create'] = function (object) {
