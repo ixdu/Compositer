@@ -1,6 +1,8 @@
 /*
-  shared objects for client and server implementations of dsa
+  Implementation of capsule Compositer module for browser
+
   Copyright (C) 2011  Alexey Bagin aka freeze (email freeze@2du.ru)
+  Copyright (c) 2014  Nikita Zaharov aka ix (email ix@2du.ru)
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as
@@ -320,9 +322,9 @@ var comp = (function () {
 	    on_text_change : function(callback){
 		unit.html.onchange = function(){
 		    callback(unit.html.value);
-		}
+		};
 	    }
-	}
+	};
 
         this.init(object);
 
@@ -348,12 +350,12 @@ var comp = (function () {
 	this.html.type = 'button';
 	var unit = this;
 	this.control = {
-	    on_pressed : function(callback){
+	    on_press : function(callback){
 		unit.html.onclick = function(){
 		    callback();
 		};
 	    }
-	}
+	};
 
         this.init(object);
 
@@ -365,6 +367,45 @@ var comp = (function () {
     Unit.prototype.types['button'].prototype.init = function (object) {
         if (typeof object.label === 'string') {
             this.html.value = object.label;
+        }
+    };
+
+    /*Video unit*/
+
+    Unit.prototype.types['video'] = function (object) {
+        this.html = document.createElement('video');
+	var unit = this;
+        this.source_child = document.createElement('source');
+	this.source_child.src = "http://docs.gstreamer.com/media/sintel_trailer-480p.webm";
+	this.html.appendChild(this.source_child);
+	this.control = {
+	    play : function(callback){
+		unit.html.play();
+	    },
+	    pause : function(){
+		unit.html.pause();
+	    },
+	    set_position : function(mseconds){
+		unit.html.currentTime = mseconds / 1000;
+	    },
+	    get_position : function(){
+		return unit.html.currentTime * 1000;
+	    },
+	    get_duration : function(){
+		return unit.html.duration * 1000;
+	    }
+	};
+
+        this.init(object);
+
+        this.prepare(object);
+    };
+
+    Unit.prototype.types['video'].prototype = new Unit(undefined, undefined);
+
+    Unit.prototype.types['video'].prototype.init = function (object) {
+        if (typeof object.source === 'string') {
+//            this.html.size = object.size;
         }
     };
 
@@ -1206,6 +1247,32 @@ var comp = (function () {
         }
 
         Unit.pool.free(buttonId);
+
+        return undefined;
+    };
+
+    Compositer.prototype['video_create'] = function (object) {
+        var video = new Unit('video', object);
+
+        video.id(Unit.pool.put(video));
+
+        return video.id(undefined);
+    };
+
+    Compositer.prototype['video_get_control'] = function(videoId){
+	return Unit.pool.take(videoId).control;
+    };
+
+    Compositer.prototype['video_destroy'] = function (videoId) {
+        if (typeof videoId !== 'number') {
+            return undefined;
+        }
+
+        if (videoId === 0) {
+            return undefined;
+        }
+
+        Unit.pool.free(videoId);
 
         return undefined;
     };
