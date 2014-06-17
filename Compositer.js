@@ -931,21 +931,21 @@ var comp = (function () {
 
                 element = Unit.pool.take(elementId);
 
-//	        console.log('pointer x is', JSON.stringify(event.clientX));
-                eventData = {
-                    'group_id'    : 0,
-                    'pointer_obj' : [{
+	        var re_disassemble = /(\d+)px/;
+	        var x = event.clientX - re_disassemble.exec(element.html.style.left)[1],
+                    y = event.clientY - re_disassemble.exec(element.html.style.top)[1];
+	       
+                eventData = [{
                         'pointer_id' : 0,
 
                         'x' : (element.width.unit  === '%') ?
-                            (100 / element.width.px().value  * event.clientX) :
-                            event.clientX,
+                            (100 / element.width.px().value  * x) :
+                            x,
 
                         'y' : (element.height.unit === '%') ?
-                            (100 / element.height.px().value * event.clientY) :
-                            event.clientY
-                    }]
-                };
+                            (100 / element.height.px().value * y) :
+			    y
+                    }];
             break;
             case 'key':
                 elementId = 0;
@@ -976,11 +976,12 @@ var comp = (function () {
         window['incident'].callback(elementId, eventName, eventData);
 
 	if(window['incident'].callbacks.hasOwnProperty(elementId))
-	    window['incident'].callbacks[elementId](eventName, eventData);
+	    window['incident'].callbacks[elementId](eventData);
 
         return undefined;
     };
 		
+    window['incident'].callback = function(){} // a litle hack for not calling events_callback_set if do not need
     window['incident'].callbacks = [];
 
     window['incident'].correct = {
