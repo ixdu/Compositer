@@ -393,6 +393,15 @@ var comp = (function () {
 	    },
 	    get_duration : function(){
 		return unit.html.duration * 1000;
+	    },
+	    get_volume : function(){
+		return unit.html.volume;
+	    },
+	    set_volume : function(volume){
+		unit.html.volume = volume;
+	    },
+	    on_timeupdate : function(callback){
+		unit.html.ontimeupdate = callback;
 	    }
 	};
 
