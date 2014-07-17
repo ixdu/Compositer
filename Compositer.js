@@ -323,6 +323,15 @@ var comp = (function () {
 		unit.html.onchange = function(){
 		    callback(unit.html.value);
 		};
+	    },
+	    set_placeholder : function(text){
+		unit.html.placeholder = text;
+	    },
+	    get_value : function(){
+		return unit.html.value;
+	    },
+	    set_value : function(value){
+		unit.html.value = value;
 	    }
 	};
 
