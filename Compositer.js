@@ -226,7 +226,10 @@ var comp = (function () {
     Unit.prototype.types['image'].prototype.init = function (object) {
         if (typeof object.source === 'string') {
             this.html.src = object.source;
-        }
+        } else
+	    if(typeof object.source == 'object'){
+		this.html.src = object.source.get_link_http();
+	    }
 
         this.html.alt = '';
 	this.html.ondragstart = function(){ return false; };
@@ -363,6 +366,9 @@ var comp = (function () {
 		unit.html.onclick = function(){
 		    callback();
 		};
+	    },
+	    set_label : function(label){
+		unit.html.value = label;	
 	    }
 	};
 
@@ -384,10 +390,16 @@ var comp = (function () {
     Unit.prototype.types['video'] = function (object) {
         this.html = document.createElement('video');
 	var unit = this;
-        this.source_child = document.createElement('source');
-	this.source_child.src = "http://docs.gstreamer.com/media/sintel_trailer-480p.webm";
-	this.html.appendChild(this.source_child);
+	this.source_child = document.createElement('source');
+	unit.html.style = 'object-fit:fill;';
+	//if(object.hasOwnProperty('source')){
+//	    unit.source_child.src = "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv";
+	//}
 	this.control = {
+	    load : function(address){
+		unit.source_child.src = address;	
+		unit.html.appendChild(unit.source_child);
+	    },
 	    play : function(callback){
 		unit.html.play();
 	    },
@@ -924,7 +936,7 @@ var comp = (function () {
 
         if (event.type === 'animation_stopped') {
 	    if(window['incident'].callbacks.hasOwnProperty(event['currentTarget']['elementId']))
-		window['incident'].callbacks[event['currentTarget']['elementId']]('animation_stopped');
+		window['incident'].callbacks[event['currentTarget']['elementId']]['animation_stopped']();
             window['incident'].callback(
                 event['currentTarget']['id'], 'animation_stopped'
             );
@@ -994,12 +1006,12 @@ var comp = (function () {
         window['incident'].callback(elementId, eventName, eventData);
 
 	if(window['incident'].callbacks.hasOwnProperty(elementId))
-	    window['incident'].callbacks[elementId](eventData);
+	    window['incident'].callbacks[elementId][eventName](eventData);
 
         return undefined;
     };
 		
-    window['incident'].callback = function(){} // a litle hack for not calling events_callback_set if do not need
+    window['incident'].callback = function(){}; // a litle hack for not calling events_callback_set if do not need
     window['incident'].callbacks = [];
 
     window['incident'].correct = {
@@ -1410,8 +1422,11 @@ var comp = (function () {
             return undefined;
         }
 
-	if(typeof(callback) != 'undefined')
-	   window['incident'].callbacks[elementId] = callback;
+	if(typeof(callback) != 'undefined'){
+	    if(!window['incident'].callbacks.hasOwnProperty(elementId))
+		window['incident'].callbacks[elementId] = {};
+	    window['incident'].callbacks[elementId][eventName] = callback;	    
+	}
 
         if (eventName === 'animation_stopped') {
             var bind = Animation.Bind.pool.take(elementId);
@@ -1456,8 +1471,8 @@ var comp = (function () {
             return undefined;
         }
  
-	if(typeof(callback) != 'undefined')
-	   delete window['incident'].callbacks[elementId];
+	if(window['incident'].callbacks[elementId].hasOwnProperty('eventName'))
+	   delete window['incident'].callbacks[elementId][eventName];
 
 	var element;
 
@@ -1504,11 +1519,13 @@ var comp = (function () {
         return undefined;
     };
 
-    return Compositer;
+    return { Compositer : Compositer, Unit : Unit };
 }());
 
-if(typeof(require) != 'undefined')
-    exports.create = function(){ return new comp(); }
-else
-    window['Compositer'] = comp;
+if(typeof(require) != 'undefined'){
+    exports.create = function(){ return new comp.Compositer();}
+    exports.Compositer = comp.Compositer;
+    exports.Unit = comp.Unit;
+} else
+    window['Compositer'] = comp.Compositer;
 
